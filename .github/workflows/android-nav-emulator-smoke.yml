@@ -196,6 +196,13 @@ jobs:
                 record_check "uiautomator_window_belongs_to_app" false
               fi
 
+              # MainActivity sets this status only after MapLibre's style callback fires.
+              if grep -Fq "MAP READY" evidence/window.xml; then
+                record_check "map_style_loaded" true
+              else
+                record_check "map_style_loaded" false
+              fi
+
               if [[ -s evidence/screenshots/launch.png ]] && "$SCREENSHOT_PYTHON" - <<'PY'
           from PIL import Image
           image = Image.open("evidence/screenshots/launch.png").convert("RGB")
@@ -230,7 +237,7 @@ jobs:
                 echo "::error::Android-nav smoke test failed (script_exit=$rc, assertion_failures=$failures). See uploaded diagnostics."
                 exit 1
               fi
-              echo "Smoke test passed: APK installed, app foregrounded, UI hierarchy belongs to app, screenshot is nonblank, and no app crash/ANR was detected."
+              echo "Smoke test passed: APK installed, launcher completed, app foregrounded, MapLibre style reached MAP READY, screenshot is nonblank, and no app crash/ANR was detected."
             }
             trap finish_smoke_test EXIT
 
