@@ -1,8 +1,6 @@
 name: Android-nav cloud emulator smoke test
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       android_nav_run_id:
