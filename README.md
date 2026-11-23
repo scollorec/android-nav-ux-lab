@@ -5,7 +5,7 @@ A public, GitHub-hosted Android emulator test harness for the private
 
 ## Purpose
 
-- Install a precisely identified Android-nav test APK on a temporary cloud emulator.
+- Install a precisely identified Android-nav emulator APK on a temporary cloud emulator.
 - Run automated launch, navigation and UI checks.
 - Capture screenshots, logcat and machine-readable test reports.
 - Tie every result to the exact Android-nav source commit and APK checksum.
@@ -17,33 +17,33 @@ real user location history or production credentials.
 
 ## Current status
 
-**Bootstrap / architecture validation.** The repository has no test workflow yet.
+**Bootstrap / integration.** The Android-nav repository already builds and
+uploads a dedicated x86_64 emulator APK from trusted feature-branch pushes.
 
-The existing Android-nav CI currently packages the POC/DEV debug APKs for
-ARM64 only. The release configuration explicitly restricts native libraries
-to `arm64-v8a`. A standard GitHub-hosted x86_64 emulator cannot install that
-APK when it contains ARM64-only native libraries. Before end-to-end app testing,
-Android-nav needs a dedicated x86_64 test APK build (without changing the
-signed ARM64 release APK), or we must validate an ARM64 emulator image and
-accept its likely performance penalty.
+Verified workflow evidence:
+- Workflow: [Option B Android POC](https://github.com/scollorec/Android-nav/actions/workflows/option-b-poc.yml)
+- Successful run: [#173 — build one source commit on phone and emulator](https://github.com/scollorec/Android-nav/actions/runs/44998552450)
+- Artifact: `android-nav-emulator-x86_64-release-apk`
+- APK filename: `Android-Nav-emulator-x86_64.apk`
+- Package: `com.scollorec.androidnav.emulator`
+- ABI verification: `x86_64`
+- Artifact retention: 7 days
 
-See [architecture and constraints](docs/ARCHITECTURE.md) and
-[test plan](docs/TEST_PLAN.md).
+No Android-nav Gradle or APK build changes are required for the initial lab integration.
 
 ## Operating model
 
-1. A trusted Android-nav build produces a dedicated test APK and records its
-   source commit.
-2. A manually dispatched workflow in this repository retrieves that artifact
-   from the private Android-nav repository using a narrowly scoped read-only
-   GitHub token stored as an Actions secret.
-3. The workflow verifies the APK checksum and package/ABI, boots a temporary
-   emulator, installs and launches the app, and runs UI tests.
-4. Screenshots, logcat and test reports are uploaded as short-retention
-   workflow artifacts.
+1. Select a successful, trusted Android-nav workflow run and its exact source commit.
+2. The manually dispatched lab workflow retrieves the emulator APK artifact from
+   the private Android-nav repository using a narrowly scoped read-only GitHub token
+   stored as an Actions secret.
+3. The workflow verifies artifact identity, APK checksum, package and ABI.
+4. It boots a temporary Android x86_64 emulator, installs and launches the app,
+   and runs UI tests.
+5. Screenshots, logcat and test reports are uploaded as short-retention lab artifacts.
 
-The lab workflow must not run for pull requests from forks and must not expose
-the cross-repository token to untrusted code.
+The lab must not clone or build private Android-nav source code. The cross-repository
+token must never be exposed to untrusted pull-request code or printed in logs.
 
 ## Cost
 
