@@ -34,6 +34,9 @@ jobs:
       EXPECTED_APK: Android-Nav-emulator-x86_64.apk
       RUN_ID: ${{ inputs.android_nav_run_id || '44998552450' }}
       EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha || '31dbb27aa81cc37b889a01610aab3db23aecc560' }}
+      # GitHub-hosted Ubuntu runners do not expose KVM. Emulator 37.3+ requires
+      # this opt-in before it will start in software (TCG) CPU-emulation mode.
+      ANDROID_I_WANT_MY_TCG: "yes"
     steps:
       - name: Validate inputs and secret availability
         shell: bash
@@ -126,7 +129,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -no-audio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-audio -no-boot-anim -camera-back none
+          emulator-boot-timeout: 900
+          disable-linux-hw-accel: true
           disable-animations: true
           script: |
             set -euo pipefail
