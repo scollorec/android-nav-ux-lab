@@ -108,7 +108,7 @@ jobs:
           [[ "$package" == "$EXPECTED_PACKAGE" ]] || { echo "::error::Unexpected APK package: $package"; exit 1; }
           unzip -Z1 "$APK_PATH" | grep -q '^lib/x86_64/' || { echo "::error::APK does not contain x86_64 native libraries"; exit 1; }
           sha256sum "$APK_PATH" | tee evidence/apk/apk.sha256
-          "$aapt_path" dump badging "$APK_PATH" | head -n 3 > evidence/apk/apk-badging.txt
+          "$aapt_path" dump badging "$APK_PATH" | sed -n '1,3p' > evidence/apk/apk-badging.txt
           {
             echo "package=$package"
             echo "abi=x86_64"
