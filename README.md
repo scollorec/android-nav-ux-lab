@@ -45,6 +45,10 @@ No Android-nav Gradle or APK build changes are required for the initial lab inte
 The lab must not clone or build private Android-nav source code. The cross-repository
 token must never be exposed to untrusted pull-request code or printed in logs.
 
+## Running the cloud smoke test
+
+See [the cloud smoke test runbook](docs/RUN_CLOUD_SMOKE_TEST.md) for one-time token setup and the first manual run. The workflow is [Android-nav cloud emulator smoke test](.github/workflows/android-nav-emulator-smoke.yml).
+
 ## Cost
 
 The repository is public. Standard GitHub-hosted Linux runner time for public
