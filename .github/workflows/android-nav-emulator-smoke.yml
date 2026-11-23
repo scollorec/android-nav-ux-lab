@@ -172,7 +172,17 @@ jobs:
                 fi
               }
 
-              [[ -s evidence/activities.txt ]] && record_check "activity_diagnostics_captured" true || record_check "activity_diagnostics_captured" false
+              if grep -q '^package:' evidence/diagnostics/package-path.txt; then
+                record_check "apk_installed" true
+              else
+                record_check "apk_installed" false
+              fi
+
+              if grep -q 'Events injected: 1' evidence/diagnostics/launch-command.txt; then
+                record_check "launcher_command_completed" true
+              else
+                record_check "launcher_command_completed" false
+              fi
 
               if grep -E 'mResumedActivity|topResumedActivity' evidence/diagnostics/resumed-activity.txt | grep -Fq "$EXPECTED_PACKAGE"; then
                 record_check "app_is_foreground" true
