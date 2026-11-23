@@ -122,6 +122,14 @@ jobs:
             echo "apk_sha256=$(cut -d' ' -f1 evidence/apk/apk.sha256)"
           } >> evidence/apk-verification.txt
 
+      - name: Prepare screenshot validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/screenshot-venv"
+          "$RUNNER_TEMP/screenshot-venv/bin/python" -m pip install --disable-pip-version-check --no-input Pillow
+          echo "SCREENSHOT_PYTHON=$RUNNER_TEMP/screenshot-venv/bin/python" >> "$GITHUB_ENV"
+
       - name: Boot Android x86_64 emulator and run smoke test
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -134,28 +142,96 @@ jobs:
           disable-linux-hw-accel: true
           disable-animations: true
           script: |
-            set -euo pipefail
-            mkdir -p evidence/screenshots
+            set -Eeuo pipefail
+            mkdir -p evidence/screenshots evidence/diagnostics
+
+            # Always preserve diagnostics, including when install, launch or an assertion fails.
+            finish_smoke_test() {
+              rc=$?
+              set +e
+
+              adb -s "${ANDROID_SERIAL:-emulator-5554}" shell dumpsys activity activities > evidence/activities.txt 2>&1
+              grep -E 'mResumedActivity|topResumedActivity' evidence/activities.txt > evidence/diagnostics/resumed-activity.txt
+              adb -s "${ANDROID_SERIAL:-emulator-5554}" shell uiautomator dump /sdcard/window.xml > evidence/diagnostics/uiautomator-dump.txt 2>&1
+              adb -s "${ANDROID_SERIAL:-emulator-5554}" pull /sdcard/window.xml evidence/window.xml >> evidence/diagnostics/uiautomator-dump.txt 2>&1
+              adb -s "${ANDROID_SERIAL:-emulator-5554}" exec-out screencap -p > evidence/screenshots/launch.png
+              adb -s "${ANDROID_SERIAL:-emulator-5554}" logcat -d -t 12000 > evidence/logcat.txt
+
+              checks=0
+              failures=0
+              record_check() {
+                name="$1"
+                passed="$2"
+                checks=$((checks + 1))
+                if [[ "$passed" == "true" ]]; then
+                  printf '  <testcase classname="android.nav.smoke" name="%s"/>\n' "$name" >> evidence/junit-smoke.xml.tmp
+                else
+                  failures=$((failures + 1))
+                  printf '  <testcase classname="android.nav.smoke" name="%s"><failure message="Assertion failed: %s"/></testcase>\n' "$name" "$name" >> evidence/junit-smoke.xml.tmp
+                fi
+              }
+
+              [[ -s evidence/activities.txt ]] && record_check "activity_diagnostics_captured" true || record_check "activity_diagnostics_captured" false
+
+              if grep -E 'mResumedActivity|topResumedActivity' evidence/diagnostics/resumed-activity.txt | grep -Fq "$EXPECTED_PACKAGE"; then
+                record_check "app_is_foreground" true
+              else
+                record_check "app_is_foreground" false
+              fi
+
+              if grep -Fq "package=\"$EXPECTED_PACKAGE\"" evidence/window.xml; then
+                record_check "uiautomator_window_belongs_to_app" true
+              else
+                record_check "uiautomator_window_belongs_to_app" false
+              fi
+
+              if [[ -s evidence/screenshots/launch.png ]] && "$SCREENSHOT_PYTHON" - <<'PY'
+            from PIL import Image
+            image = Image.open("evidence/screenshots/launch.png").convert("RGB")
+            if image.width < 320 or image.height < 480:
+                raise SystemExit("Screenshot resolution is too small")
+            sample = image.resize((64, 64))
+            unique_colours = len(set(sample.getdata()))
+            if unique_colours < 40:
+                raise SystemExit(f"Screenshot appears blank or nearly uniform ({unique_colours} sampled colours)")
+            print(f"Screenshot visual check passed: {image.width}x{image.height}, {unique_colours} sampled colours")
+            PY
+              then
+                record_check "screenshot_is_visually_nonblank" true
+              else
+                record_check "screenshot_is_visually_nonblank" false
+              fi
+
+              if grep -E "Process: $EXPECTED_PACKAGE|ANR in $EXPECTED_PACKAGE|Force finishing activity $EXPECTED_PACKAGE" evidence/logcat.txt >/dev/null; then
+                record_check "no_app_crash_or_anr" false
+              else
+                record_check "no_app_crash_or_anr" true
+              fi
+
+              {
+                printf '<testsuite name="android-nav-cloud-smoke" tests="%s" failures="%s" errors="0" skipped="0">\n' "$checks" "$failures"
+                cat evidence/junit-smoke.xml.tmp
+                printf '</testsuite>\n'
+              } > evidence/junit-smoke.xml
+              rm -f evidence/junit-smoke.xml.tmp
+
+              if [[ "$rc" -ne 0 || "$failures" -ne 0 ]]; then
+                echo "::error::Android-nav smoke test failed (script_exit=$rc, assertion_failures=$failures). See uploaded diagnostics."
+                exit 1
+              fi
+              echo "Smoke test passed: APK installed, app foregrounded, UI hierarchy belongs to app, screenshot is nonblank, and no app crash/ANR was detected."
+            }
+            trap finish_smoke_test EXIT
+
             adb wait-for-device
             adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 2; done'
             adb shell settings put system accelerometer_rotation 0
+            adb logcat -c
             adb install -r "$APK_PATH"
+            installed_path="$(adb shell pm path "$EXPECTED_PACKAGE" | tr -d '\r')"
+            [[ "$installed_path" == package:* ]] || { echo "::error::Package manager cannot find installed app"; exit 1; }
             adb shell monkey -p "$EXPECTED_PACKAGE" -c android.intent.category.LAUNCHER 1
-            sleep 25
-            adb shell dumpsys activity activities > evidence/activities.txt
-            adb shell uiautomator dump /sdcard/window.xml >/dev/null
-            adb pull /sdcard/window.xml evidence/window.xml
-            adb exec-out screencap -p > evidence/screenshots/launch.png
-            adb logcat -d -t 12000 > evidence/logcat.txt
-            grep -q "$EXPECTED_PACKAGE" evidence/activities.txt
-            cat > evidence/junit-smoke.xml <<'XML'
-            <?xml version="1.0" encoding="UTF-8"?>
-            <testsuite name="android-nav-cloud-smoke" tests="2" failures="0" errors="0" skipped="0">
-              <testcase classname="android.nav.smoke" name="apk_installed"/>
-              <testcase classname="android.nav.smoke" name="launcher_activity_started"/>
-            </testsuite>
-            XML
-            echo "Smoke test passed: package installed, launcher started, screenshot captured."
+            sleep 30
 
       - name: Upload emulator evidence
         if: always()
