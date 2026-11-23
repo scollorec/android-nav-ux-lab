@@ -148,6 +148,7 @@ jobs:
             # Always preserve diagnostics, including when install, launch or an assertion fails.
             finish_smoke_test() {
               rc=$?
+              trap - EXIT
               set +e
 
               adb -s "${ANDROID_SERIAL:-emulator-5554}" shell dumpsys activity activities > evidence/activities.txt 2>&1
@@ -186,16 +187,16 @@ jobs:
               fi
 
               if [[ -s evidence/screenshots/launch.png ]] && "$SCREENSHOT_PYTHON" - <<'PY'
-            from PIL import Image
-            image = Image.open("evidence/screenshots/launch.png").convert("RGB")
-            if image.width < 320 or image.height < 480:
-                raise SystemExit("Screenshot resolution is too small")
-            sample = image.resize((64, 64))
-            unique_colours = len(set(sample.getdata()))
-            if unique_colours < 40:
-                raise SystemExit(f"Screenshot appears blank or nearly uniform ({unique_colours} sampled colours)")
-            print(f"Screenshot visual check passed: {image.width}x{image.height}, {unique_colours} sampled colours")
-            PY
+          from PIL import Image
+          image = Image.open("evidence/screenshots/launch.png").convert("RGB")
+          if image.width < 320 or image.height < 480:
+              raise SystemExit("Screenshot resolution is too small")
+          sample = image.resize((64, 64))
+          unique_colours = len(set(sample.getdata()))
+          if unique_colours < 40:
+              raise SystemExit(f"Screenshot appears blank or nearly uniform ({unique_colours} sampled colours)")
+          print(f"Screenshot visual check passed: {image.width}x{image.height}, {unique_colours} sampled colours")
+          PY
               then
                 record_check "screenshot_is_visually_nonblank" true
               else
