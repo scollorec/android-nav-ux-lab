@@ -76,7 +76,7 @@ jobs:
           artifact_id="$(jq -r '.id' <<<"$artifact")"
           expected_zip_digest="$(jq -r '.digest // empty' <<<"$artifact")"
           [[ -n "$expected_zip_digest" ]] || { echo "::error::Artifact API did not provide a digest"; exit 1; }
-          curl --fail-with-body --silent --show-error "${headers[@]}" "$api/actions/artifacts/$artifact_id/zip" -o evidence/apk/artifact.zip
+          curl --location --fail-with-body --silent --show-error "${headers[@]}" "$api/actions/artifacts/$artifact_id/zip" -o evidence/apk/artifact.zip
           actual_zip_digest="sha256:$(sha256sum evidence/apk/artifact.zip | cut -d' ' -f1)"
           [[ "$actual_zip_digest" == "$expected_zip_digest" ]] || { echo "::error::Artifact ZIP digest mismatch"; exit 1; }
           echo "$actual_zip_digest" > evidence/apk/artifact-zip.sha256
@@ -147,9 +147,6 @@ jobs:
             </testsuite>
             XML
             echo "Smoke test passed: package installed, launcher started, screenshot captured."
-        env:
-          APK_PATH: ${{ env.APK_PATH }}
-          EXPECTED_PACKAGE: ${{ env.EXPECTED_PACKAGE }}
 
       - name: Upload emulator evidence
         if: always()
