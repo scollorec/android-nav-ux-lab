@@ -4,7 +4,7 @@
 
 | Component | Responsibility |
 |---|---|
-| Private Android-nav repository | Source code, unit tests, trusted APK build |
+| Private Android-nav repository | Source code, unit tests and trusted emulator APK build |
 | Public android-nav-ux-lab repository | Emulator orchestration, UI tests, screenshots and reports |
 | GitHub Actions | Temporary Linux runner and emulator lifecycle |
 | Cross-repository artifact access | Retrieve the exact APK from a trusted Android-nav workflow run |
@@ -12,6 +12,27 @@
 
 The lab does not clone or build the private application source. It tests the
 APK produced by the private repository's trusted workflow.
+
+## Existing emulator APK — verified
+
+The Android-nav workflow already has a dedicated emulator build. At commit
+`31dbb27aa81cc37b889a01610aab3db23aecc560`, the workflow contains these steps:
+
+- `Build signed Android-nav-emulator APK`
+- `Verify emulator APK signature, package and ABI`
+- `Upload signed emulator APK`
+- `Send signed emulator APK to Telegram`
+
+The uploaded artifact is named
+`android-nav-emulator-x86_64-release-apk`, contains
+`Android-Nav-emulator-x86_64.apk`, and is retained for 7 days.
+The workflow verifies package `com.scollorec.androidnav.emulator`
+and ABI `x86_64`.
+
+Evidence: [successful Android-nav run #173](https://github.com/scollorec/Android-nav/actions/runs/44998552450).
+
+**No Gradle or APK build changes are required for the lab's initial integration.**
+The lab should consume this existing artifact.
 
 ## Security boundary
 
@@ -25,33 +46,18 @@ APK produced by the private repository's trusted workflow.
 - Do not use `pull_request_target` or expose secrets to forked pull requests.
 - Test locations and route fixtures must be synthetic and clearly labelled.
 
-## APK / emulator ABI constraint
-
-The inspected Android-nav app Gradle configuration sets
-`abiFilters += "arm64-v8a"`. The current CI workflow also verifies ARM64
-release output. This is appropriate for the physical Galaxy S23 but is not
-compatible with a standard x86_64 Android emulator when the APK contains
-ARM64-only native libraries.
-
-The lab should use a dedicated x86_64 test APK, produced by a test-only build
-configuration in Android-nav. The production and signed DEV release variants
-must remain ARM64-only. The test APK should use a distinct application ID or
-be otherwise clearly separated from release artifacts, and should contain no
-production signing material.
-
-Do not silently attempt to install an ARM64-only APK on an x86_64 emulator.
-Fail early with a clear ABI diagnostic.
-
 ## Workflow shape
 
-1. Manual dispatch with an explicit Android-nav workflow run ID or commit SHA.
-2. Download the matching test APK from the private Android-nav Actions artifact.
-3. Verify source SHA metadata, APK SHA-256, package name and native ABI.
-4. Start a pinned Android x86_64 emulator image on a GitHub-hosted Linux runner.
-5. Install APK and wait for boot completion.
-6. Run smoke/UI tests and collect screenshots plus logcat on both success and failure.
-7. Upload test evidence with short retention.
-8. Terminate the emulator with the runner.
+1. Manually dispatch the lab with an explicit Android-nav workflow run ID.
+2. Confirm the run succeeded, is from an allowed trusted branch, and has the
+   expected source commit.
+3. Download artifact `android-nav-emulator-x86_64-release-apk` from that run.
+4. Verify the APK SHA-256, package name and native ABI before installation.
+5. Start a pinned Android x86_64 emulator image on a GitHub-hosted Linux runner.
+6. Install the APK, wait for boot completion and launch the application.
+7. Run smoke/UI tests and collect screenshots plus logcat on both success and failure.
+8. Upload test evidence with short retention.
+9. Let the runner terminate the emulator at job completion.
 
 The workflow must fail if the artifact is missing, stale, has the wrong package
 or ABI, or does not match the requested source commit.
