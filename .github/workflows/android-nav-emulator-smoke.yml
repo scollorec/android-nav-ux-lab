@@ -97,6 +97,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The legacy 'tools' SDK package no longer exists in Google's repository.
+          # The emulator action installs the API image and emulator packages itself.
+          packages: platform-tools
 
       - name: Verify APK package, ABI and checksum
         shell: bash
