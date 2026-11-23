@@ -95,12 +95,10 @@ jobs:
             echo "artifact_expires_at=$(jq -r '.expires_at' <<<"$artifact")"
           } >> evidence/artifact-metadata.txt
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          # The legacy 'tools' SDK package no longer exists in Google's repository.
-          # The emulator action installs the API image and emulator packages itself.
-          packages: platform-tools
+      # GitHub's ubuntu-24.04 runner already includes the Android SDK,
+      # platform-tools and build-tools. Avoid setup-android@v3 here: it
+      # still unconditionally requests the removed legacy SDK package "tools".
+      # reactivecircus/android-emulator-runner installs the requested image.
 
       - name: Verify APK package, ABI and checksum
         shell: bash
