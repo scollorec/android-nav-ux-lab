@@ -38,10 +38,14 @@ The tested app artifact came from the trusted Android-nav
 The detailed [user-scenario catalogue](docs/USER_SCENARIOS.md) defines the full
 coverage target and distinguishes verified, planned, dependency-gated, device-only
 and not-yet-implemented capabilities. The [test plan](docs/TEST_PLAN.md) tracks
-the staged implementation. The first functional expansion injects synthetic GPS,
-checks the custom location marker, verifies follow after a second fix, pans the
-map and checks re-centering. The harness code is being validated; these scenarios
-remain unverified until a hosted run succeeds.
+the staged implementation. The first functional expansion injects synthetic GPS, checks the custom location
+marker, verifies follow after a second fix, pans the map and checks re-centering.
+The first hosted execution, [run #13](https://github.com/scollorec/android-nav-ux-lab/actions/runs/45386108369),
+failed the app-visible location assertions: no location marker was detected, the
+second fix produced no visible viewport movement, and the recenter tap did not
+restore the camera after a manual pan. The emulator's provider dump recorded the
+injected location, but that is not proof the app callback or map renderer consumed
+it. See the scenario catalogue for the failure evidence and current status.
 
 ## Operating model
 

@@ -127,6 +127,8 @@ The regression suite must cover:
 
 A mocked test is not a hosted-emulator test. MAP READY in the current app means the MapLibre style callback ran; it does not prove all map tiles rendered. The central-viewport screenshot check is a heuristic, not semantic map recognition. Never claim that routes, GPS or navigation work unless separate tests establish that.
 
+For apps using Google Play services `FusedLocationProviderClient`, distinguish provider state from app receipt. An app-attributed `WorkSource` request or a GPS/fused last location in `dumpsys location` proves only that Android/GMS has a request or provider fix; it does not prove that the app's location callback received the coordinate or that its map layer/camera updated. Capture provider snapshots and bounded logcat around each synthetic fix. Investigate `blocked - too close` messages against the exact `LocationRequest` minimum distance and the separation between injected coordinates; repeated identical fixes can be filtered normally. Require app-observable callback/test telemetry or rendered marker/camera behaviour, and do not weaken those assertions because `adb emu geo fix` or `dumpsys location` reports success.
+
 ## 5. Safe editing and GitHub commit discipline
 
 ### Before editing

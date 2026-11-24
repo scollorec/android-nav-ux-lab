@@ -28,13 +28,13 @@ See APP-01 to APP-04 and PERM-01 to PERM-03 in the scenario catalogue.
 ## Stage 2 — map and location
 
 - [x] MapLibre MapView appears in the UI hierarchy and the captured viewport contains visible map detail; the viewport check is a visual heuristic only.
-- [ ] Initial camera and user-location marker follow an injected synthetic coordinate that differs materially from the demo camera. (Harness implementation added; hosted result pending.)
-- [ ] A second synthetic GPS fix moves the location marker correctly. (Harness implementation added; hosted result pending.)
-- [ ] Manual map movement disables follow; the recenter control restores the camera to the injected fix. (Harness implementation added; hosted result pending.)
+- [ ] Initial camera and user-location marker follow an injected synthetic coordinate that differs materially from the demo camera. (**FAIL in hosted run #13:** no marker or camera movement observed.)
+- [ ] A second synthetic GPS fix moves the location marker correctly. (**FAIL in hosted run #13:** no marker or material viewport change observed.)
+- [ ] Manual map movement disables follow; the recenter control restores the camera to the injected fix. (**FAIL in hosted run #13:** map pan worked, but recenter tap did not restore the viewport.)
 - [ ] Disabled, unavailable, stale and low-accuracy location states are communicated correctly.
 - [ ] Location updates recover after interruption without duplicate listeners or a crash.
 
-The existing run #12 evidence covers only MapLibre surface presence and a viewport-detail heuristic. It does not verify the initial camera, a location marker, GPS updates or re-centering.
+The existing run #12 evidence covers only MapLibre surface presence and a viewport-detail heuristic. Run #13 exercised the new GPS scenarios but failed the app-visible marker/follow/recenter assertions. See the [run #13 artifact](https://github.com/scollorec/android-nav-ux-lab/actions/runs/45386108369/artifacts/14917260922) and [scenario-level results](USER_SCENARIOS.md) for evidence. Provider-level GPS state must not be mistaken for proof of app callback delivery or rendering.
 
 See MAP-01 and LOC-01 to LOC-06 in the scenario catalogue.
 
