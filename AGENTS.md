@@ -35,7 +35,7 @@ A job that runs repository scripts, tests or configuration must first check out 
     - name: Checkout test harness repository
       uses: actions/checkout@v4
       with:
-        ref: github.sha
+        ref: ${{ github.sha }}
         persist-credentials: false
 
 The ref value in the actual workflow must be the GitHub expression for the triggering commit SHA. The checkout step must precede every repository-local script or test. Disable persisted checkout credentials because this workflow does not push to the repository.
