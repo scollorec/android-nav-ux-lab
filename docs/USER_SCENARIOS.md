@@ -37,14 +37,16 @@ The current hosted baseline is UX Lab run [#12](https://github.com/scollorec/and
 | ID | User journey | Expected result | Execution | Status |
 |---|---|---|---|---|
 | MAP-01 | Open the map | MapLibre surface is present and the viewport contains visible detail | Cloud UI + screenshot | **PARTIAL** — run #12 verifies surface and a visual heuristic only |
-| LOC-01 | Launch with a synthetic location far from the demo camera | Camera and location marker move to the injected coordinate | Emulator GPS + visual marker assertion | **IMPLEMENTED-UNVERIFIED** |
-| LOC-02 | Move the synthetic device location | Location marker follows the new coordinate and the map viewport changes | Emulator GPS + screenshot assertion | **IMPLEMENTED-UNVERIFIED** |
-| LOC-03 | Pan the map, then tap “Use my location and recenter map” | Marker moves off-centre after pan and returns to centre after the accessible recenter control is tapped | Cloud UI + emulator GPS + screenshot assertion | **IMPLEMENTED-UNVERIFIED** |
+| LOC-01 | Launch with a synthetic location far from the demo camera | Camera and location marker move to the injected coordinate | Emulator GPS + visual marker assertion | **FAIL — run #13** |
+| LOC-02 | Move the synthetic device location | Location marker follows the new coordinate and the map viewport changes | Emulator GPS + screenshot assertion | **FAIL — run #13** |
+| LOC-03 | Pan the map, then tap “Use my location and recenter map” | Marker moves off-centre after pan and returns to centre after the accessible recenter control is tapped | Cloud UI + emulator GPS + screenshot assertion | **FAIL — run #13** |
 | LOC-04 | Disable or withhold location | App presents a clear unavailable state; no stale fix is presented as current | Cloud UI + location controls | PLANNED |
 | LOC-05 | Provide an old or inaccurate fix | App distinguishes stale/low-quality location from a fresh usable fix | Synthetic provider/instrumented seam | PLANNED |
 | LOC-06 | Lose and regain location updates | Marker and camera recover without duplicate listeners or a crash | Emulator GPS | PLANNED |
 
 The current MapLibre screenshot check is a rendering heuristic, not map recognition. GPS correctness must be asserted independently. A successful `emu geo fix` command alone proves only that the emulator accepted a coordinate; it does not prove that the app consumed it or rendered the marker at that position.
+
+**Hosted result — [UX Lab run #13](https://github.com/scollorec/android-nav-ux-lab/actions/runs/45386108369): FAIL.** The six-case location suite recorded two passes and four failures. Foreground permission grant and discovery/tap of the accessible recenter control passed. No red location marker was detected in any of the four location screenshots; the second fix caused no material viewport change; and the screenshot after recenter was effectively unchanged from the post-pan screenshot. The final Android location-provider dump reported GPS/fused coordinates `48.860598, 2.337600` and an app-attributed high-accuracy request. This is provider-level evidence only, not proof that the app callback received the fix or rendered it. The [run artifact](https://github.com/scollorec/android-nav-ux-lab/actions/runs/45386108369/artifacts/14917260922) contains screenshots, JUnit XML, provider dump and bounded logcat.
 
 ## C. Destination search and saved places
 
