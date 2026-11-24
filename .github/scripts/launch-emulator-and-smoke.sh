@@ -108,4 +108,5 @@ for setting in window_animation_scale transition_animation_scale animator_durati
 done
 "$ADB_BIN" -s "$ANDROID_SERIAL" logcat -c
 write_bootstrap_junit 0
-bash "$SCRIPT_DIR/emulator-smoke.sh"
+ENABLE_LOCATION_SCENARIOS=1 bash "$SCRIPT_DIR/emulator-smoke.sh"
+bash "$SCRIPT_DIR/location-scenario.sh"

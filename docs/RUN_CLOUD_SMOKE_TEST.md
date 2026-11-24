@@ -34,6 +34,7 @@ In GitHub, open **Actions → Android-nav cloud emulator smoke test → Run work
 - APK SHA-256 recorded in evidence.
 - Android API 35 Google APIs x86_64 Pixel 2 AVD created on the hosted runner. The workflow enables KVM permissions and verifies `emulator -accel-check`; it uses KVM when available and only falls back to TCG when the check fails. Before input/settings commands, the launcher checks boot completion, InputManager registration and a responsive Settings provider.
 - APK installation, launcher execution, MapLibre MapView accessibility presence, map viewport visual heuristic and crash/ANR checks.
+- Foreground location permission grant and a synthetic GPS fix before app launch, followed by marker-centering, second-fix follow, map-pan and accessible recenter assertions. The red-marker pixel detector is a visual heuristic; command-level GPS injection is not treated as app-level proof.
 - Emulator output, readiness probes and test JUnit reports retained in the evidence bundle.
 - Screenshot, UI hierarchy, activity dump, bounded logcat and JUnit smoke report.
 

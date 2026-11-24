@@ -134,6 +134,7 @@ jobs:
           set -euo pipefail
           bash tests/test-emulator-readiness.sh
           bash tests/test-emulator-smoke.sh
+          bash tests/test-location-scenario.sh
 
       - name: Install Android API 35 x86_64 emulator image and create AVD
         shell: bash
