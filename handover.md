@@ -46,6 +46,7 @@ Keep UX Lab changes separate from Android-nav application fixes. Use synthetic G
 - PR #2 merged the run #13 failure record, corrected scenario statuses and an engineering rule distinguishing GMS/provider state from proof that the app consumed a location fix: [PR #2](https://github.com/scollorec/android-nav-ux-lab/pull/2).
 - The run #13 app was built from `feature/t1-tesla-experience` at source commit `31dbb27aa81cc37b889a01610aab3db23aecc560`. That T1 implementation uses a red Tesla current-position arrow (`createTeslaCurrentPositionArrow`), so the red-arrow screenshot checker is correct; all four run #13 screenshots contain no such marker. The defect is app-side, not a marker-colour mismatch. The manual-only emulator workflow allowlists `feature/uxlab-gps-location-follow-t1` alongside the existing `feature/t1-tesla-experience` source branch; exact run/SHA/artifact digest/package/ABI/checksum checks remain intact.
 - PR #2 merge commit: `d2e686ff8e1f6853bb67136e445f71259a929774`.
+- [PR #5](https://github.com/scollorec/android-nav-ux-lab/pull/5) adds only the new T1 GPS fix branch to the existing trusted-source allowlist and its regression guard. It does not change the marker checker or retroactively reclassify run #13.
 
 ## Application-repository gate
 
