@@ -70,7 +70,7 @@ jobs:
           jq -e --arg sha "$EXPECTED_SOURCE_SHA" '
             .id and .status == "completed" and .conclusion == "success"
             and (.head_sha | ascii_downcase) == ($sha | ascii_downcase)
-            and (.head_branch == "feature/t1-tesla-experience" or .head_branch == "feature/uxlab-gps-location-follow")
+            and (.head_branch == "feature/t1-tesla-experience" or .head_branch == "feature/uxlab-gps-location-follow-t1")
             and (.event == "push" or .event == "workflow_dispatch")
           ' run.json >/dev/null || {
             echo "::error::Run must be successful, completed, from an explicitly trusted feature branch, and match expected SHA."
