@@ -144,7 +144,7 @@ expected = {
     "recenter_returns_location_marker_to_centre",
 }
 actual = {node.attrib["name"] for node in suite.findall("testcase")}
-assert suite.attrib["tests"] == "6", suite.attrib
+assert suite.attrib["tests"] == "7", suite.attrib
 assert suite.attrib["failures"] == "0", suite.attrib
 assert actual == expected, actual
 PYXML
