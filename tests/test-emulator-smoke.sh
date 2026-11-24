@@ -19,7 +19,8 @@ PYCODE
 grep -q '^      - name: Checkout test harness repository$' "$WORKFLOW"
 grep -q '^        uses: actions/checkout@v4$' "$WORKFLOW"
 grep -q '^          persist-credentials: false$' "$WORKFLOW"
-grep -q '^          script: bash .github/scripts/emulator-smoke.sh$' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml" -q '^  workflow_dispatch:' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml"
+grep -q '^          script: bash .github/scripts/emulator-smoke.sh$' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml"
+grep -q '^  workflow_dispatch:' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml"
 if grep -Eq '^  (push|pull_request|pull_request_target):' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml"; then
   echo "The workflow must remain manual-only" >&2
   exit 1
