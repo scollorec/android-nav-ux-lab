@@ -86,7 +86,7 @@ case "${1:-}" in
     exit 0
     ;;
   pull)
-    printf '<hierarchy><node package="%s" content-desc="Use my location and recenter map" bounds="[400,80][456,136]" /></hierarchy>\n' "$EXPECTED_PACKAGE" > "$3"
+    printf '<hierarchy><node package="%s" content-desc="Use my location and recenter map · Location fix received" bounds="[400,80][456,136]" /></hierarchy>\n' "$EXPECTED_PACKAGE" > "$3"
     exit 0
     ;;
   exec-out)
@@ -138,13 +138,14 @@ suite = ET.parse(sys.argv[1]).getroot()
 expected = {
     "foreground_location_permissions_granted_before_app_launch",
     "initial_synthetic_location_marker_is_centered",
+    "app_location_callback_received",
     "map_follow_remains_enabled_after_second_synthetic_fix",
     "manual_map_pan_moves_location_marker_off_centre",
     "recenter_control_found_and_tapped_by_accessibility",
     "recenter_returns_location_marker_to_centre",
 }
 actual = {node.attrib["name"] for node in suite.findall("testcase")}
-assert suite.attrib["tests"] == "6", suite.attrib
+assert suite.attrib["tests"] == "7", suite.attrib
 assert suite.attrib["failures"] == "0", suite.attrib
 assert actual == expected, actual
 PYXML
