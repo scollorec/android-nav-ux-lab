@@ -31,7 +31,7 @@ done
   exit 1
 }
 mkdir -p "$EVIDENCE_DIR/diagnostics"
-printf 'VM acceleration mode: %s\\n' "$EMULATOR_ACCEL_MODE" > "$EVIDENCE_DIR/diagnostics/emulator-acceleration.txt"
+printf 'VM acceleration mode: %s\n' "$EMULATOR_ACCEL_MODE" > "$EVIDENCE_DIR/diagnostics/emulator-acceleration.txt"
 if [[ "$EMULATOR_ACCEL_MODE" == "on" ]]; then
   if ! "$EMULATOR_BIN" -accel-check > "$EVIDENCE_DIR/diagnostics/emulator-accel-check.txt" 2>&1; then
     echo "::error::KVM was selected but emulator -accel-check failed." >&2
