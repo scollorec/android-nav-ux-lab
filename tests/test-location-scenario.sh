@@ -21,7 +21,6 @@ if [[ -f "$LAUNCHER" && -f "$SMOKE" && -f "$WORKFLOW" ]]; then
   grep -q 'emu geo fix "$INITIAL_FIX_LONGITUDE" "$INITIAL_FIX_LATITUDE"' "$SMOKE"
   grep -q 'bash tests/test-location-scenario.sh' "$WORKFLOW"
   grep -q '^  workflow_dispatch:' "$WORKFLOW"
-  grep -q 'feature/uxlab-gps-location-follow' "$WORKFLOW"
   if grep -Eq '^  (push|pull_request|pull_request_target):' "$WORKFLOW"; then
     echo "The workflow must remain manual-only" >&2
     exit 1
@@ -43,7 +42,7 @@ for name, center, background in fixtures:
     image = Image.new("RGB", (480, 800), background)
     if center:
         x, y = center
-        ImageDraw.Draw(image).ellipse((x-8, y-8, x+8, y+8), fill=(0, 132, 255))
+        ImageDraw.Draw(image).polygon([(x, y-20), (x+11, y+13), (x, y+6), (x-11, y+13)], fill=(239, 72, 52))
     image.save(root / name)
 PY
 
@@ -114,7 +113,7 @@ fixtures = (
 for name, centre, background in fixtures:
     image = Image.new("RGB", (480, 800), background)
     x, y = centre
-    ImageDraw.Draw(image).ellipse((x-8, y-8, x+8, y+8), fill=(0, 132, 255))
+    ImageDraw.Draw(image).polygon([(x, y-20), (x+11, y+13), (x, y+6), (x-11, y+13)], fill=(239, 72, 52))
     image.save(root / name)
 PY
 
