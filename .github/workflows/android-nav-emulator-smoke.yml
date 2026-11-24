@@ -38,6 +38,12 @@ jobs:
       # this opt-in before it will start in software (TCG) CPU-emulation mode.
       ANDROID_I_WANT_MY_TCG: "yes"
     steps:
+      - name: Checkout test harness repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
       - name: Validate inputs and secret availability
         shell: bash
         env:
