@@ -15,9 +15,15 @@ ADB_BIN="$ANDROID_HOME/platform-tools/adb"
 EMULATOR_BIN="$ANDROID_HOME/emulator/emulator"
 READINESS_HELPER="$SCRIPT_DIR/wait-for-android-readiness.sh"
 EMULATOR_PID=""
-for required in "$ADB_BIN" "$EMULATOR_BIN" "$READINESS_HELPER"; do
+for required in "$ADB_BIN" "$EMULATOR_BIN"; do
   [[ -x "$required" ]] || { echo "::error::Required executable not found: $required" >&2; exit 1; }
 done
+# This helper is invoked through Bash, so it needs to be a readable file,
+# not an executable file. Repository scripts are intentionally mode 100644.
+[[ -f "$READINESS_HELPER" && -r "$READINESS_HELPER" ]] || {
+  echo "::error::Required Bash script not found or unreadable: $READINESS_HELPER" >&2
+  exit 1
+}
 mkdir -p "$EVIDENCE_DIR/diagnostics"
 export ANDROID_AVD_HOME ANDROID_SERIAL ADB_BIN
 export ANDROID_I_WANT_MY_TCG="${ANDROID_I_WANT_MY_TCG:-yes}"

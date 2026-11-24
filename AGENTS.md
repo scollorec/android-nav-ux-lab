@@ -57,6 +57,8 @@ The reactivecircus/android-emulator-runner implementation inspected for this pro
 
 Shell choice is an interface contract. Never use Bash-only syntax under POSIX sh, and never assume a script's shebang determines how a third-party Action executes its input.
 
+For repository-owned scripts invoked explicitly as `bash path/to/script.sh`, require a regular readable file (`-f` and `-r`), not executable permission (`-x`). GitHub's repository tree may store shell scripts as mode `100644`, which is valid when Bash reads the file. Reserve `-x` checks for native executables or scripts launched directly by path. Add a regression assertion whenever a launcher validates this distinction.
+
 ### Android framework readiness
 
 - Do not treat `sys.boot_completed=1` as proof that every Android framework service is registered. InputManager and the Settings provider can become available later.

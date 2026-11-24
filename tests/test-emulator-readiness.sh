@@ -17,6 +17,13 @@ grep -q 'service check input' "$HELPER"
 grep -q 'settings get global window_animation_scale' "$HELPER"
 grep -q 'ANDROID_I_WANT_MY_TCG' "$LAUNCHER"
 grep -q 'bash .github/scripts/launch-emulator-and-smoke.sh' "$WORKFLOW"
+# Bash-invoked repository scripts are mode 100644; only native tools need -x.
+grep -Fq 'for required in "$ADB_BIN" "$EMULATOR_BIN"; do' "$LAUNCHER"
+grep -Fq '[[ -f "$READINESS_HELPER" && -r "$READINESS_HELPER" ]]' "$LAUNCHER"
+if grep -Fq '[[ -x "$READINESS_HELPER" ]]' "$LAUNCHER"; then
+  echo "Bash-invoked readiness helper must not require its executable bit." >&2
+  exit 1
+fi
 if grep -q 'reactivecircus/android-emulator-runner@v2' "$WORKFLOW"; then
   echo "The workflow must not rely on the action's premature post-boot ADB command." >&2
   exit 1
