@@ -28,7 +28,7 @@ See APP-01 to APP-04 and PERM-01 to PERM-03 in the scenario catalogue.
 ## Stage 2 — map and location
 
 - [x] MapLibre MapView appears in the UI hierarchy and the captured viewport contains visible map detail; the viewport check is a visual heuristic only.
-- [ ] Initial camera and user-location marker follow an injected synthetic coordinate that differs materially from the demo camera. (**FAIL in hosted run #13:** no marker or camera movement observed.)
+- [ ] Initial app callback, camera and user-location marker follow an injected synthetic coordinate that differs materially from the demo camera. (**FAIL in hosted run #13:** no marker or camera movement observed.) The lab now asserts callback receipt separately through a non-sensitive accessibility state; it does not log coordinates.
 - [ ] A second synthetic GPS fix moves the location marker correctly. (**FAIL in hosted run #13:** no marker or material viewport change observed.)
 - [ ] Manual map movement disables follow; the recenter control restores the camera to the injected fix. (**FAIL in hosted run #13:** map pan worked, but recenter tap did not restore the viewport.)
 - [ ] Disabled, unavailable, stale and low-accuracy location states are communicated correctly.
