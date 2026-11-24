@@ -20,7 +20,7 @@
 
 ## Stage 2 — map and location
 
-- [ ] Map surface renders without a blank or fatal-error state.
+- [ ] MapLibre MapView appears in the UI hierarchy and the captured viewport contains visible map detail; treat the latter as a visual heuristic, not semantic tile/route validation.
 - [ ] Synthetic GPS location is injected.
 - [ ] User-location marker appears.
 - [ ] Re-centre action returns the camera to the injected location.

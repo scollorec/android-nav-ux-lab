@@ -97,7 +97,7 @@ Report these layers separately:
 | Regression | Mocked ADB success/failure cases; parse JUnit XML | Harness logic and failure reporting under controlled inputs |
 | Workflow | Checkout, order, inputs, permissions, trigger policy, artifact wiring | Workflow structure and configuration |
 | Hosted emulator | Actual GitHub runner and Android emulator execution | Runner, emulator, APK install and launch work |
-| UI/evidence | Foreground app, UI hierarchy, MapLibre readiness, screenshot and crash checks | Only the behaviours explicitly asserted |
+| UI/evidence | Foreground app, UI hierarchy, MapLibre surface presence, screenshot and crash checks | Only the behaviours explicitly asserted |
 
 Before committing, run the regression suite from a clean checkout with its dependencies. For this project:
 
@@ -114,10 +114,12 @@ Also run available checks such as actionlint, shellcheck and git diff --check. I
 
 The regression suite must cover:
 
-- Happy path: install, launch, foreground app, expected UI hierarchy, MapLibre style-ready signal, visible map-viewport detail and no app crash/ANR.
+- Happy path: install, launch, foreground app, MapLibre accessibility node, visible map-viewport detail and no app crash/ANR.
 - Install/package failure and app not foreground.
-- MapLibre never reaches its ready signal.
+- MapLibre MapView accessibility node is absent from the UI hierarchy.
 - Blank or nearly uniform map viewport.
+- Check the actual target APK's source and runtime UI hierarchy before asserting a debug/status label. A status TextView that is set to `GONE` is not observable through UI Automator; prefer a stable accessibility node plus a separate rendered-viewport assertion.
+- Do not claim a MapLibre style callback ran based only on MapView presence. The separate screenshot heuristic establishes only that the captured viewport contains visual detail.
 - App crash or ANR in logcat.
 - Failure diagnostics and JUnit XML are produced even when setup or an assertion fails.
 - JUnit XML is parsed and expected test/failure counts are checked.

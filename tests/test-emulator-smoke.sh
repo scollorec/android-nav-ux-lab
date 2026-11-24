@@ -91,10 +91,10 @@ case "$1" in
   pull)
     if [ "$MOCK_FAIL_INSTALL" = "1" ]; then
       printf '<hierarchy><node package="com.android.launcher3" text="Launcher" /></hierarchy>\n' > "$3"
-    elif [ "$MOCK_NO_MAP_READY" = "1" ]; then
+    elif [ "$MOCK_NO_MAP_SURFACE" = "1" ]; then
       printf '<hierarchy><node package="%s" text="LOADING MAP" /></hierarchy>\n' "$EXPECTED_PACKAGE" > "$3"
     else
-      printf '<hierarchy><node package="%s" text="MAP READY · Locating you" /></hierarchy>\n' "$EXPECTED_PACKAGE" > "$3"
+      printf '<hierarchy><node package="%s" content-desc="Showing a Map created with MapLibre. Scroll by dragging two fingers. Zoom by pinching two fingers." /></hierarchy>\n' "$EXPECTED_PACKAGE" > "$3"
     fi ;;
   exec-out) [ "$MOCK_BLANK" = "1" ] && cat "$MOCK_BLANK_SCREENSHOT" || cat "$MOCK_SCREENSHOT" ;;
   logcat)
@@ -112,7 +112,7 @@ export APK_PATH="$TMP/fake.apk"
 export SCREENSHOT_PYTHON="$PYTHON"
 export MOCK_SCREENSHOT="$TMP/map.png"
 export MOCK_BLANK_SCREENSHOT="$TMP/blank.png"
-export MOCK_FAIL_INSTALL=0 MOCK_CRASH=0 MOCK_NO_MAP_READY=0 MOCK_BLANK=0
+export MOCK_FAIL_INSTALL=0 MOCK_CRASH=0 MOCK_NO_MAP_SURFACE=0 MOCK_BLANK=0
 export SMOKE_MAP_READY_TIMEOUT_SECONDS=0
 export SMOKE_MAP_TILE_SETTLE_SECONDS=0
 : > "$APK_PATH"
@@ -129,12 +129,12 @@ assert suite.attrib["tests"] == "7" and suite.attrib["failures"] == "0"
 assert len(suite.findall("testcase")) == 7
 PYXML
 
-# Missing MapLibre-ready signal must fail and produce a JUnit failure.
-if MOCK_NO_MAP_READY=1 EVIDENCE_DIR="$TMP/no-map-ready" bash "$SCRIPT" > "$TMP/no-map-ready.log" 2>&1; then
-  echo "Expected missing MAP READY assertion to fail" >&2
+# Missing MapLibre map-surface accessibility node must fail and produce JUnit failure.
+if MOCK_NO_MAP_SURFACE=1 EVIDENCE_DIR="$TMP/no-map-surface" bash "$SCRIPT" > "$TMP/no-map-surface.log" 2>&1; then
+  echo "Expected missing MapLibre surface assertion to fail" >&2
   exit 1
 fi
-grep -q 'name="map_style_loaded"><failure' "$TMP/no-map-ready/junit-smoke.xml"
+grep -q 'name="map_surface_present"><failure' "$TMP/no-map-surface/junit-smoke.xml"
 
 # App crash in logcat must fail.
 if MOCK_CRASH=1 EVIDENCE_DIR="$TMP/crash" bash "$SCRIPT" > "$TMP/crash.log" 2>&1; then
@@ -162,7 +162,7 @@ import sys
 import xml.etree.ElementTree as ET
 suite = ET.parse(sys.argv[1]).getroot()
 assert suite.attrib["failures"] == "6"
-for name in ("apk_installed", "launcher_command_completed", "app_is_foreground", "uiautomator_window_belongs_to_app", "map_style_loaded", "map_viewport_has_visual_detail"):
+for name in ("apk_installed", "launcher_command_completed", "app_is_foreground", "uiautomator_window_belongs_to_app", "map_surface_present", "map_viewport_has_visual_detail"):
     assert suite.find(f".//testcase[@name='{name}']/failure") is not None
 PYXML
 

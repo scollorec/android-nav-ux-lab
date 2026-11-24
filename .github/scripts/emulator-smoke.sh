@@ -71,11 +71,13 @@ finish_smoke_test() {
     record_check "uiautomator_window_belongs_to_app" false
   fi
 
-  # Android-nav's MainActivity sets MAP READY only from the MapLibre style callback.
-  if grep -Fq 'MAP READY' "$EVIDENCE_DIR/window.xml" 2>/dev/null; then
-    record_check "map_style_loaded" true
+  # MainActivity's diagnostic status TextView is GONE in the normal landing UI.
+  # The MapLibre MapView exposes this accessibility description; the separate
+  # screenshot assertion below verifies that map pixels contain visible detail.
+  if grep -Fq 'Showing a Map created with MapLibre' "$EVIDENCE_DIR/window.xml" 2>/dev/null; then
+    record_check "map_surface_present" true
   else
-    record_check "map_style_loaded" false
+    record_check "map_surface_present" false
   fi
 
   if [[ -s "$EVIDENCE_DIR/screenshots/launch.png" ]] && \
@@ -104,7 +106,7 @@ finish_smoke_test() {
     echo "::error::Android-nav smoke test failed (script_exit=$script_exit, assertion_failures=$failures). See uploaded diagnostics."
     exit 1
   fi
-  echo "Smoke test passed: APK installed, launcher completed, app foregrounded, MapLibre style loaded, map viewport has visible detail, and no app crash/ANR was detected."
+  echo "Smoke test passed: APK installed, launcher completed, app foregrounded, MapLibre surface is present, map viewport has visible detail, and no app crash/ANR was detected."
 }
 
 trap finish_smoke_test EXIT
@@ -125,20 +127,20 @@ printf '%s\n' "$installed_path" > "$EVIDENCE_DIR/diagnostics/package-path.txt"
 adb_cmd shell monkey -p "$EXPECTED_PACKAGE" -c android.intent.category.LAUNCHER 1 \
   > "$EVIDENCE_DIR/diagnostics/launch-command.txt" 2>&1
 
-# Wait for the app's MapLibre style-loaded status instead of assuming a fixed
-# startup delay. The screenshot is then allowed to settle for tile rendering.
+# Wait for the MapLibre MapView accessibility node instead of assuming a
+# fixed startup delay. A separate screenshot assertion checks visible map detail.
 map_ready_deadline=$((SECONDS + MAP_READY_TIMEOUT_SECONDS))
 while true; do
   adb_cmd shell uiautomator dump /sdcard/window.xml \
     > "$EVIDENCE_DIR/diagnostics/map-readiness-dump.txt" 2>&1 || true
   adb_cmd pull /sdcard/window.xml "$EVIDENCE_DIR/diagnostics/map-readiness-window.xml" \
     >> "$EVIDENCE_DIR/diagnostics/map-readiness-dump.txt" 2>&1 || true
-  if grep -Fq 'MAP READY' "$EVIDENCE_DIR/diagnostics/map-readiness-window.xml" 2>/dev/null; then
-    echo "MapLibre style reported ready."
+  if grep -Fq 'Showing a Map created with MapLibre' "$EVIDENCE_DIR/diagnostics/map-readiness-window.xml" 2>/dev/null; then
+    echo "MapLibre map surface appeared in the UI hierarchy."
     break
   fi
   if (( SECONDS >= map_ready_deadline )); then
-    echo "::error::Timed out waiting for MainActivity to report MAP READY." >&2
+    echo "::error::Timed out waiting for the MapLibre map surface to appear in the UI hierarchy." >&2
     exit 1
   fi
   sleep 5

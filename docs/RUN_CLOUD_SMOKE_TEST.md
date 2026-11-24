@@ -33,7 +33,7 @@ In GitHub, open **Actions → Android-nav cloud emulator smoke test → Run work
 - Extracted APK filename, package `com.scollorec.androidnav.emulator`, and x86_64 native ABI.
 - APK SHA-256 recorded in evidence.
 - Android API 35 Google APIs x86_64 Pixel 2 AVD created on the hosted runner. The workflow enables KVM permissions and verifies `emulator -accel-check`; it uses KVM when available and only falls back to TCG when the check fails. Before input/settings commands, the launcher checks boot completion, InputManager registration and a responsive Settings provider.
-- APK installation, launcher execution, MapLibre style readiness, map viewport visual heuristic and crash/ANR checks.
+- APK installation, launcher execution, MapLibre MapView accessibility presence, map viewport visual heuristic and crash/ANR checks.
 - Emulator output, readiness probes and test JUnit reports retained in the evidence bundle.
 - Screenshot, UI hierarchy, activity dump, bounded logcat and JUnit smoke report.
 
@@ -41,7 +41,7 @@ The workflow first applies GitHub's documented KVM udev permission rule and chec
 
 The emulator is started by the checked-in launcher rather than delegating boot completion to a third-party Action. This is intentional: `sys.boot_completed=1` can be observable before InputManager and Settings are registered. The launcher waits for both before issuing unlock or settings commands. Do not reintroduce the third-party runner unless its post-boot service-readiness behaviour has been verified in the exact version selected.
 
-The screenshot and UI hierarchy are evidence for a human review of map rendering; the viewport check is a heuristic and does **not** prove semantic map-tile or route correctness.
+The UI hierarchy assertion checks the MapLibre MapView accessibility node. The app's diagnostic `MAP READY` TextView is hidden in the normal landing UI, so it is not a valid UI-automator readiness signal. The separate screenshot and viewport check are evidence of rendered map detail, but remain a heuristic and do **not** prove semantic map-tile or route correctness.
 
 ## Evidence retention
 
