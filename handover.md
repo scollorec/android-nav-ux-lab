@@ -73,3 +73,17 @@ The 39 catalogue rows currently classify as: **0 VERIFIED, 2 PARTIAL, 3 FAIL, 1 
 - For each user interaction on the app/lab project, update this handover with the actual work, exact commits/runs, evidence, blockers and next action.
 - GPS-fix source branch: `feature/uxlab-gps-location-follow-t1` in the private app repository, HEAD `b40cb0b915db242f20b74e785fb323cd3a570ae3`. App workflow run [#181](https://github.com/scollorec/Android-nav/actions/runs/45424518011) is currently in progress; no APK or GPS pass is claimed yet. The public lab PRs only add the trusted source branch and callback assertion; the red-arrow checker is unchanged.
 - Handover PR [#3](https://github.com/scollorec/android-nav-ux-lab/pull/3) was merged to `main` as commit `69f241c033da26e08dbba82c4baab51a7b0af059`; the merged file was fetched back and verified.
+
+## Actions plugin teardown — 2026-11-24
+
+The standalone ChatGPT integration created to list and dispatch approved GitHub Actions workflows for `scollorec/Android-nav` and `scollorec/android-nav-ux-lab` was rolled back after it was found to be Desktop-only and unsuitable for the intended ChatGPT web use.
+
+- Cloudflare Worker `android-nav-actions-mcp` was deleted successfully.
+- Its dedicated Workers KV namespace `android-nav-actions-oauth` (ID `12411b286e64457f8d37428ee0d34476`) was deleted successfully. A subsequent account inventory confirmed that neither resource remains.
+- Deleting the Worker removed its bound `GITHUB_TOKEN` and `ADMIN_PASSWORD` secrets with it. The original GitHub personal access token was **not** revoked; its use outside this Worker could not be established from the available GitHub connection.
+- The existing `ha-sentinel` Worker was verified present and left unchanged. Fedora MCP was not touched.
+- GitHub repositories, branches, workflow files, Actions secrets and workflow runs were not modified. Repository metadata and file listings were read only; no workflow was dispatched as part of this integration teardown.
+- The ChatGPT plugin record `android-nav-actions` (private personal plugin, version `1.0.2`, backend ID `plugins_6b05e134290c819195f7c6da9c2cce1f`) remains in Created by you. The app-uninstall operation reported `not_installed`, and the available Plugin Creator interface exposes no permanent-delete operation. Manual deletion through ChatGPT's plugin management UI or OpenAI Support remains outstanding if the record is to be removed completely.
+
+**Status:** Cloudflare backend teardown verified; no GitHub repository/workflow changes; ChatGPT plugin record and original GitHub token revocation remain outstanding. Do not recreate or redeploy this integration without an explicit new request and a verified browser-compatible hosting path.
+
