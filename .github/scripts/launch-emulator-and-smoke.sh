@@ -9,6 +9,12 @@ EVIDENCE_DIR="${EVIDENCE_DIR:-evidence}"
 AVD_NAME="${ANDROID_AVD_NAME:-android-nav-api35}"
 EMULATOR_PORT="${EMULATOR_PORT:-5554}"
 ANDROID_SERIAL="emulator-${EMULATOR_PORT}"
+: "${ANDROID_EMULATOR_ACCEL:?ANDROID_EMULATOR_ACCEL must be set by the KVM detection step}"
+EMULATOR_ACCEL_MODE="$ANDROID_EMULATOR_ACCEL"
+case "$EMULATOR_ACCEL_MODE" in
+  on|off) ;;
+  *) echo "::error::ANDROID_EMULATOR_ACCEL must be 'on' or 'off'." >&2; exit 64 ;;
+esac
 BOOT_TIMEOUT_SECONDS="${ANDROID_BOOT_TIMEOUT_SECONDS:-900}"
 SERVICE_TIMEOUT_SECONDS="${ANDROID_SERVICE_TIMEOUT_SECONDS:-120}"
 ADB_BIN="$ANDROID_HOME/platform-tools/adb"
@@ -25,9 +31,22 @@ done
   exit 1
 }
 mkdir -p "$EVIDENCE_DIR/diagnostics"
+printf 'VM acceleration mode: %s\\n' "$EMULATOR_ACCEL_MODE" > "$EVIDENCE_DIR/diagnostics/emulator-acceleration.txt"
+if [[ "$EMULATOR_ACCEL_MODE" == "on" ]]; then
+  if ! "$EMULATOR_BIN" -accel-check > "$EVIDENCE_DIR/diagnostics/emulator-accel-check.txt" 2>&1; then
+    echo "::error::KVM was selected but emulator -accel-check failed." >&2
+    cat "$EVIDENCE_DIR/diagnostics/emulator-accel-check.txt" >&2
+    exit 1
+  fi
+else
+  echo "TCG fallback selected; software CPU emulation is significantly slower." \
+    | tee "$EVIDENCE_DIR/diagnostics/emulator-accel-check.txt"
+fi
 export ANDROID_AVD_HOME ANDROID_SERIAL ADB_BIN
-export ANDROID_I_WANT_MY_TCG="${ANDROID_I_WANT_MY_TCG:-yes}"
 export PATH="$ANDROID_HOME/platform-tools:$PATH"
+if [[ "$EMULATOR_ACCEL_MODE" == "off" ]]; then
+  export ANDROID_I_WANT_MY_TCG=yes
+fi
 write_bootstrap_junit() {
   local failures="$1"
   local failure_xml=""
@@ -68,7 +87,7 @@ trap 'exit 143' TERM
   -no-audio \
   -no-boot-anim \
   -camera-back none \
-  -accel off \
+  -accel "$EMULATOR_ACCEL_MODE" \
   -no-metrics \
   > "$EVIDENCE_DIR/diagnostics/emulator.log" 2>&1 &
 EMULATOR_PID=$!

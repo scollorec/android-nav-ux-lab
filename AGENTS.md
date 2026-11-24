@@ -59,6 +59,16 @@ Shell choice is an interface contract. Never use Bash-only syntax under POSIX sh
 
 For repository-owned scripts invoked explicitly as `bash path/to/script.sh`, require a regular readable file (`-f` and `-r`), not executable permission (`-x`). GitHub's repository tree may store shell scripts as mode `100644`, which is valid when Bash reads the file. Reserve `-x` checks for native executables or scripts launched directly by path. Add a regression assertion whenever a launcher validates this distinction.
 
+### Android emulator VM acceleration
+
+- Do not assume GitHub-hosted Ubuntu runners lack KVM. Standard Linux runners can expose `/dev/kvm` while denying access to the runner user until the documented permission rule is applied.
+- Before emulator startup, apply the KVM udev rule (`KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"`), reload/trigger udev, and verify with `$ANDROID_HOME/emulator/emulator -accel-check`.
+- When the check succeeds, set `ANDROID_EMULATOR_ACCEL=on` and launch with `-accel on`. If KVM is genuinely unavailable, emit a clear warning, set `ANDROID_EMULATOR_ACCEL=off` and `ANDROID_I_WANT_MY_TCG=yes`, and launch with `-accel off`.
+- Do not set the TCG opt-in unconditionally at job level or hard-code `-accel off` when KVM is available. Capture both the selected mode and acceleration-check output in the evidence.
+- Treat TCG as a degraded fallback, not the normal path. In run #10, Emulator 37.3.10 ran without KVM, took 554206 ms to boot, then the Android watchdog reported the system_server main thread blocked for 63 seconds and killed system_server. Do not mask this with longer timeouts.
+- Regression tests must assert that KVM setup and the acceleration check precede emulator launch, the launcher uses the verified mode, and TCG opt-in is limited to the fallback path.
+- References: [GitHub Actions hardware-accelerated Android virtualization](https://github.blog/changelog/2024-04-02-github-actions-hardware-accelerated-android-virtualization-now-available/); [Android Emulator acceleration](https://developer.android.com/studio/run/emulator-acceleration); [Emulator command-line acceleration modes](https://developer.android.com/studio/run/emulator-commandline).
+
 ### Android framework readiness
 
 - Do not treat `sys.boot_completed=1` as proof that every Android framework service is registered. InputManager and the Settings provider can become available later.
@@ -74,7 +84,7 @@ For repository-owned scripts invoked explicitly as `bash path/to/script.sh`, req
 - Keep permissions least-privilege; this lab normally needs contents: read.
 - Run the harness regression tests before spending time booting the cloud emulator.
 - Upload bounded diagnostics on success and failure using an always() evidence step.
-- Preserve the TCG/software-emulation configuration unless a real hosted-run result justifies changing it.
+- Prefer verified KVM hardware acceleration on Linux runners; use TCG only when the acceleration check proves KVM unavailable.
 - Do not increase timeouts to hide deterministic setup, path or script defects.
 
 ## 4. Test strategy and required gates

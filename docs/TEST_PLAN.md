@@ -4,7 +4,8 @@
 
 - [ ] Obtain a dedicated x86_64 test APK from a trusted Android-nav CI run.
 - [ ] Verify the artifact's source commit and SHA-256.
-- [ ] Boot the selected x86_64 emulator image on a GitHub-hosted Linux runner.
+- [ ] Enable KVM permissions where `/dev/kvm` is available and verify `emulator -accel-check`; use TCG only as an explicit fallback.
+- [ ] Boot the selected x86_64 emulator image on a GitHub-hosted Linux runner with the verified acceleration mode.
 - [ ] Wait for `sys.boot_completed`, InputManager registration and a responsive Settings provider before input or settings operations.
 - [ ] Install the APK and verify the expected package is present.
 - [ ] Launch the main activity and capture a baseline screenshot.

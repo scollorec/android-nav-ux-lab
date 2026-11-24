@@ -32,10 +32,12 @@ In GitHub, open **Actions → Android-nav cloud emulator smoke test → Run work
 - Artifact ZIP digest against GitHub's artifact metadata.
 - Extracted APK filename, package `com.scollorec.androidnav.emulator`, and x86_64 native ABI.
 - APK SHA-256 recorded in evidence.
-- Android API 35 Google APIs x86_64 Pixel 2 AVD created on the hosted runner, started in TCG mode, and checked for boot completion, InputManager registration and a responsive Settings provider before input/settings commands.
+- Android API 35 Google APIs x86_64 Pixel 2 AVD created on the hosted runner. The workflow enables KVM permissions and verifies `emulator -accel-check`; it uses KVM when available and only falls back to TCG when the check fails. Before input/settings commands, the launcher checks boot completion, InputManager registration and a responsive Settings provider.
 - APK installation, launcher execution, MapLibre style readiness, map viewport visual heuristic and crash/ANR checks.
 - Emulator output, readiness probes and test JUnit reports retained in the evidence bundle.
 - Screenshot, UI hierarchy, activity dump, bounded logcat and JUnit smoke report.
+
+The workflow first applies GitHub's documented KVM udev permission rule and checks whether KVM is usable. Hardware acceleration is preferred; TCG remains an explicit fallback and can be extremely slow on hosted runners. The selected mode and check output are retained in evidence.
 
 The emulator is started by the checked-in launcher rather than delegating boot completion to a third-party Action. This is intentional: `sys.boot_completed=1` can be observable before InputManager and Settings are registered. The launcher waits for both before issuing unlock or settings commands. Do not reintroduce the third-party runner unless its post-boot service-readiness behaviour has been verified in the exact version selected.
 

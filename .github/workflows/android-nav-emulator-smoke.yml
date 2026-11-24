@@ -34,9 +34,6 @@ jobs:
       EXPECTED_APK: Android-Nav-emulator-x86_64.apk
       RUN_ID: ${{ inputs.android_nav_run_id || '44998552450' }}
       EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha || '31dbb27aa81cc37b889a01610aab3db23aecc560' }}
-      # GitHub-hosted Ubuntu runners do not expose KVM. Emulator 37.3+ requires
-      # this opt-in before it will start in software (TCG) CPU-emulation mode.
-      ANDROID_I_WANT_MY_TCG: "yes"
     steps:
       - name: Checkout test harness repository
         uses: actions/checkout@v4
@@ -179,6 +176,31 @@ jobs:
           }
           echo "ANDROID_AVD_HOME=$avd_home" >> "$GITHUB_ENV"
           echo "ANDROID_AVD_NAME=$avd_name" >> "$GITHUB_ENV"
+
+      - name: Enable KVM acceleration when available
+        shell: bash
+        run: |
+          set -euo pipefail
+          # GitHub-hosted Linux runners expose /dev/kvm, but the runner user
+          # may not have permission until the documented udev rule is applied.
+          if [[ -c /dev/kvm ]]; then
+            echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+              | sudo tee /etc/udev/rules.d/99-kvm4all.rules >/dev/null
+            sudo udevadm control --reload-rules
+            sudo udevadm trigger --name-match=kvm
+          else
+            echo "::warning::/dev/kvm is not present on this runner."
+          fi
+
+          emulator_bin="$ANDROID_HOME/emulator/emulator"
+          if "$emulator_bin" -accel-check; then
+            echo "ANDROID_EMULATOR_ACCEL=on" >> "$GITHUB_ENV"
+            echo "KVM acceleration is available and will be used."
+          else
+            echo "::warning::KVM is unavailable; falling back to very slow TCG software CPU emulation."
+            echo "ANDROID_EMULATOR_ACCEL=off" >> "$GITHUB_ENV"
+            echo "ANDROID_I_WANT_MY_TCG=yes" >> "$GITHUB_ENV"
+          fi
 
       - name: Launch Android x86_64 emulator and run smoke test
         shell: bash
