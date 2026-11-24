@@ -46,7 +46,8 @@ Keep UX Lab changes separate from Android-nav application fixes. Use synthetic G
 - PR #2 merged the run #13 failure record, corrected scenario statuses and an engineering rule distinguishing GMS/provider state from proof that the app consumed a location fix: [PR #2](https://github.com/scollorec/android-nav-ux-lab/pull/2).
 - The run #13 app was built from `feature/t1-tesla-experience` at source commit `31dbb27aa81cc37b889a01610aab3db23aecc560`. That T1 implementation uses a red Tesla current-position arrow (`createTeslaCurrentPositionArrow`), so the red-arrow screenshot checker is correct; all four run #13 screenshots contain no such marker. The defect is app-side, not a marker-colour mismatch. The manual-only emulator workflow allowlists `feature/uxlab-gps-location-follow-t1` alongside the existing `feature/t1-tesla-experience` source branch; exact run/SHA/artifact digest/package/ABI/checksum checks remain intact.
 - PR #2 merge commit: `d2e686ff8e1f6853bb67136e445f71259a929774`.
-- [PR #5](https://github.com/scollorec/android-nav-ux-lab/pull/5) adds only the new T1 GPS fix branch to the existing trusted-source allowlist and its regression guard. It does not change the marker checker or retroactively reclassify run #13.
+- [PR #5](https://github.com/scollorec/android-nav-ux-lab/pull/5) merged as `d74d7e398c3d7f2396438a724d4c0ad2b47bd4a4`; it adds only the new T1 GPS fix branch to the trusted-source allowlist and regression guard. It does not change the marker checker or retroactively reclassify run #13.
+- [PR #6](https://github.com/scollorec/android-nav-ux-lab/pull/6) merged as `95493d467ffda3f10d905874363ab42d314d293e`; the location suite now separately asserts app callback receipt through the non-sensitive accessibility label `Location fix received`.
 
 ## Application-repository gate
 
@@ -56,13 +57,12 @@ The 39 catalogue rows currently classify as: **0 VERIFIED, 2 PARTIAL, 3 FAIL, 1 
 
 ## Next actions
 
-1. **Application defect investigation (blocking):** in the private Android-nav repository, inspect the location permission/state flow, `FusedLocationProviderClient` callback registration and delivery, location marker/layer visibility, initial camera policy, map follow state and recenter action. Use run #13 evidence as the reproduction. Keep this work in the app repository, not this public lab.
-2. Add app-level observable telemetry or a test seam where appropriate so tests can distinguish callback receipt from Android provider state. Do not rely on `adb emu geo fix` or `dumpsys location` alone.
-3. Build a new trusted emulator APK from the corrected app revision and record its exact source SHA, artifact ID/digest and APK checksum.
-4. Dispatch the manual-only UX Lab workflow on `main` using the new trusted run ID and exact SHA. The workflow must remain constrained to `workflow_dispatch`, `main`, least-privilege permissions and trusted artifact validation.
-5. Inspect the new run's jobs, complete failing logs (if any), screenshots, JUnit and artifact. Mark LOC-01/02/03 verified only when their app-visible assertions pass on a hosted emulator.
-6. Once Stage 2 is genuinely passing, automate the next deterministic journeys: destination search/results selection, route preview and map interaction during navigation. Keep Photon/Valhalla dependency tests separate from deterministic UI tests.
-7. Run and report the full 39-scenario catalogue by status. Do not label planned, dependency-gated, device-only or not-implemented scenarios as passed. Android Auto remains a separate Desktop Head Unit/physical-device programme.
+1. Wait for Android-nav workflow run [#181](https://github.com/scollorec/Android-nav/actions/runs/45424518011); inspect all unit-test tasks, signed DEV/emulator APK artifacts, source SHA, package IDs, ABIs and checksums.
+2. Install the signed DEV APK on the Galaxy S23 and obtain owner acceptance for that exact source SHA before merging any app-source PR. The local Fedora workstation MCP is not available in this chat session, so do not claim a local emulator deployment.
+3. Use the trusted emulator artifact from the same source run to dispatch the manual-only UX Lab workflow on `main` with exact run ID and SHA.
+4. Inspect callback receipt, red marker screenshots, second-fix camera movement, map pan and recenter. Mark LOC-01/02/03 verified only when all stated app-visible assertions pass.
+5. Once Stage 2 is genuinely passing, automate the next deterministic journeys: destination search/results selection, route preview and map interaction during navigation. Keep Photon/Valhalla dependency tests separate from deterministic UI tests.
+6. Run and report the full 39-scenario catalogue by status. Do not label planned, dependency-gated, device-only or not-implemented scenarios as passed. Android Auto remains a separate Desktop Head Unit/physical-device programme.
 
 ## Execution constraints
 
@@ -71,5 +71,5 @@ The 39 catalogue rows currently classify as: **0 VERIFIED, 2 PARTIAL, 3 FAIL, 1 
 - Do not change Android-nav app source from this repository.
 - Do not mark a scenario PASS without hosted evidence for its stated assertion.
 - For each user interaction on the app/lab project, update this handover with the actual work, exact commits/runs, evidence, blockers and next action.
-- GPS-fix source branch: `feature/uxlab-gps-location-follow-t1` in the private app repository. The public lab PR only adds that exact branch to the existing trusted-source allowlist; it does not alter the red-arrow checker.
+- GPS-fix source branch: `feature/uxlab-gps-location-follow-t1` in the private app repository, HEAD `b40cb0b915db242f20b74e785fb323cd3a570ae3`. App workflow run [#181](https://github.com/scollorec/Android-nav/actions/runs/45424518011) is currently in progress; no APK or GPS pass is claimed yet. The public lab PRs only add the trusted source branch and callback assertion; the red-arrow checker is unchanged.
 - Handover PR [#3](https://github.com/scollorec/android-nav-ux-lab/pull/3) was merged to `main` as commit `69f241c033da26e08dbba82c4baab51a7b0af059`; the merged file was fetched back and verified.
