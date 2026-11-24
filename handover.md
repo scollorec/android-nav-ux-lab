@@ -47,6 +47,12 @@ Keep UX Lab changes separate from Android-nav application fixes. Use synthetic G
 - PR #2 merged the run #13 failure record, corrected scenario statuses and an engineering rule distinguishing GMS/provider state from proof that the app consumed a location fix: [PR #2](https://github.com/scollorec/android-nav-ux-lab/pull/2).
 - Main after PR #2: `d2e686ff8e1f6853bb67136e445f71259a929774`.
 
+## Application-repository gate
+
+The private app repository was checked read-only after run #13. Its `AGENTS.md` requires reading the milestone handoff/plan and completing the current milestone's acceptance gates before source changes. Current `docs/HANDOFF.md` records `milestone: M1`, `status: D2_ACCEPTED`, `next_milestone: D2 merge approval`; it also states that PR #10 is closed/unmerged and explicit merge approval is required. Therefore no Android-nav source edits or app PR merge were made as part of this UX Lab task. Any location correction must first be aligned with the app repository's milestone owner/gate, then follow its unit-test, signed DEV APK, Galaxy S23 acceptance and handoff-update protocol.
+
+The 39 catalogue rows currently classify as: **0 VERIFIED, 2 PARTIAL, 3 FAIL, 1 DEPENDENCY-GATED, 27 PLANNED, 3 NOT IN CURRENT POC, 3 DEVICE-ONLY**. The seven passing smoke assertions in run #13 are harness checks, not seven additional verified user journeys.
+
 ## Next actions
 
 1. **Application defect investigation (blocking):** in the private Android-nav repository, inspect the location permission/state flow, `FusedLocationProviderClient` callback registration and delivery, location marker/layer visibility, initial camera policy, map follow state and recenter action. Use run #13 evidence as the reproduction. Keep this work in the app repository, not this public lab.
@@ -64,3 +70,4 @@ Keep UX Lab changes separate from Android-nav application fixes. Use synthetic G
 - Do not change Android-nav app source from this repository.
 - Do not mark a scenario PASS without hosted evidence for its stated assertion.
 - For each user interaction on the app/lab project, update this handover with the actual work, exact commits/runs, evidence, blockers and next action.
+- Handover PR: [PR #3](https://github.com/scollorec/android-nav-ux-lab/pull/3), branch `docs/ux-lab-handover-2026-11-24`; this file has been fetched back and verified. It is not yet merged to `main`.
