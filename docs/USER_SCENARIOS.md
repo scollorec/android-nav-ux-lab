@@ -12,6 +12,7 @@ This catalogue is the user-journey coverage contract for the UX Lab. It is delib
 |---|---|
 | **VERIFIED** | A hosted emulator run has executed the stated assertion and retained evidence. |
 | **PARTIAL** | Some part of the journey is automated, but an important behaviour is not asserted. |
+| **IMPLEMENTED-UNVERIFIED** | Harness assertions and local regression fixtures are implemented on a proposed branch, but no hosted emulator run has validated them yet. |
 | **PLANNED** | The scenario is defined but not yet automated. |
 | **DEPENDENCY-GATED** | The scenario needs an external service; service availability must be reported separately from app behaviour. |
 | **DEVICE-ONLY** | A cloud emulator is insufficient; the named physical device or head-unit environment is required. |
@@ -36,9 +37,9 @@ The current hosted baseline is UX Lab run [#12](https://github.com/scollorec/and
 | ID | User journey | Expected result | Execution | Status |
 |---|---|---|---|---|
 | MAP-01 | Open the map | MapLibre surface is present and the viewport contains visible detail | Cloud UI + screenshot | **PARTIAL** — run #12 verifies surface and a visual heuristic only |
-| LOC-01 | Launch with a synthetic location far from the demo camera | Camera and location marker move to the injected coordinate | Emulator GPS + semantic/visual assertion | PLANNED |
-| LOC-02 | Move the synthetic device location | Location marker follows the new coordinate | Emulator GPS + screenshot/assertion | PLANNED |
-| LOC-03 | Pan the map, then tap “Use my location and recenter map” | Camera returns to the current synthetic fix and follow mode resumes | Cloud UI + emulator GPS | PLANNED |
+| LOC-01 | Launch with a synthetic location far from the demo camera | Camera and location marker move to the injected coordinate | Emulator GPS + visual marker assertion | **IMPLEMENTED-UNVERIFIED** |
+| LOC-02 | Move the synthetic device location | Location marker follows the new coordinate and the map viewport changes | Emulator GPS + screenshot assertion | **IMPLEMENTED-UNVERIFIED** |
+| LOC-03 | Pan the map, then tap “Use my location and recenter map” | Marker moves off-centre after pan and returns to centre after the accessible recenter control is tapped | Cloud UI + emulator GPS + screenshot assertion | **IMPLEMENTED-UNVERIFIED** |
 | LOC-04 | Disable or withhold location | App presents a clear unavailable state; no stale fix is presented as current | Cloud UI + location controls | PLANNED |
 | LOC-05 | Provide an old or inaccurate fix | App distinguishes stale/low-quality location from a fresh usable fix | Synthetic provider/instrumented seam | PLANNED |
 | LOC-06 | Lose and regain location updates | Marker and camera recover without duplicate listeners or a crash | Emulator GPS | PLANNED |
