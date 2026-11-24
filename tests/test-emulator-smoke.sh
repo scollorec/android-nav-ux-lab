@@ -31,6 +31,7 @@ install_line="$(grep -n '^      - name: Install Android API 35 x86_64 emulator i
 launch_line="$(grep -n '^      - name: Launch Android x86_64 emulator and run smoke test$' "$WORKFLOW" | cut -d: -f1)"
 grep -q '^      - name: Enable KVM acceleration when available$' "$WORKFLOW"
 kvm_line="$(grep -n '^      - name: Enable KVM acceleration when available$' "$WORKFLOW" | cut -d: -f1)"
+(( kvm_line < launch_line ))
 (( bootstrap_line < install_line && install_line < launch_line ))
 grep -q '^      - name: Launch Android x86_64 emulator and run smoke test$' "$WORKFLOW"
 grep -q 'bash .github/scripts/launch-emulator-and-smoke.sh' "$WORKFLOW"
