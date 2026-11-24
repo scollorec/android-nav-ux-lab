@@ -5,6 +5,7 @@
 - [ ] Obtain a dedicated x86_64 test APK from a trusted Android-nav CI run.
 - [ ] Verify the artifact's source commit and SHA-256.
 - [ ] Boot the selected x86_64 emulator image on a GitHub-hosted Linux runner.
+- [ ] Wait for `sys.boot_completed`, InputManager registration and a responsive Settings provider before input or settings operations.
 - [ ] Install the APK and verify the expected package is present.
 - [ ] Launch the main activity and capture a baseline screenshot.
 - [ ] Capture logcat and upload evidence even when a test fails.

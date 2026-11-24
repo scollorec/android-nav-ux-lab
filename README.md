@@ -15,6 +15,8 @@ This repository contains test infrastructure only. It must not contain the
 Android-nav application source, signing keys, private endpoints, API tokens,
 real user location history or production credentials.
 
+Before changing this repository, read the mandatory [engineering instructions](AGENTS.md).
+
 ## Current status
 
 **Bootstrap / integration.** The Android-nav repository already builds and

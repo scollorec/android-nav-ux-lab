@@ -57,6 +57,14 @@ The reactivecircus/android-emulator-runner implementation inspected for this pro
 
 Shell choice is an interface contract. Never use Bash-only syntax under POSIX sh, and never assume a script's shebang determines how a third-party Action executes its input.
 
+### Android framework readiness
+
+- Do not treat `sys.boot_completed=1` as proof that every Android framework service is registered. InputManager and the Settings provider can become available later.
+- Before issuing `input keyevent` or writing system settings, poll `adb shell service check input` until it reports `found`, and query a read-only Settings key such as `settings get global window_animation_scale` to confirm that provider is responsive.
+- Use bounded waits, retain failed readiness probes in the evidence bundle, and fail with a clear diagnostic when readiness is not reached.
+- If a third-party emulator Action performs post-boot ADB commands internally and offers no hook before them, do not assume a later custom script can recover the job. Use a checked-in launcher with explicit readiness control, or wait for a reviewed upstream fix/release before reintroducing that Action.
+- Regression tests must cover delayed service registration, delayed Settings availability and readiness timeouts. The known race is documented in [issue #489](https://github.com/ReactiveCircus/android-emulator-runner/issues/489) and proposed [pull request #495](https://github.com/ReactiveCircus/android-emulator-runner/pull/495); verify their status before relying on them.
+
 ### Preserve workflow boundaries
 
 - The cloud emulator workflow is deliberately manual-only. Do not add push, pull_request or pull_request_target triggers without an explicit architecture and security review.
@@ -81,8 +89,11 @@ Report these layers separately:
 
 Before committing, run the regression suite from a clean checkout with its dependencies. For this project:
 
+    bash -n .github/scripts/wait-for-android-readiness.sh
+    bash -n .github/scripts/launch-emulator-and-smoke.sh
     bash -n .github/scripts/emulator-smoke.sh
     python3 -m py_compile scripts/check-map-screenshot.py
+    bash tests/test-emulator-readiness.sh
     bash tests/test-emulator-smoke.sh
 
 The regression suite expects SCREENSHOT_PYTHON to identify a Python interpreter with Pillow installed, as configured by the workflow's screenshot-preparation step. Set it explicitly for local execution.
@@ -113,6 +124,7 @@ A mocked test is not a hosted-emulator test. MAP READY in the current app means 
 - Prefer a structured patch or a complete known-good file over chained string replacements.
 - Never perform broad/repeated replacements in long scripts. Do not let a replacement re-match text introduced by itself.
 - Do not hand-encode Base64. Use UTF-8 content with the GitHub tool's supported encoding.
+- After every distinct CI or runtime failure, assess whether the durable instructions are missing a reusable engineering rule. Update AGENTS.md in the same coherent change when the failure exposes a new invariant; do this as a routine review, while avoiding redundant notes for issues already covered.
 
 ### Before committing
 

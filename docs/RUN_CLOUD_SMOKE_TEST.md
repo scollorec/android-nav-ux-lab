@@ -32,10 +32,14 @@ In GitHub, open **Actions → Android-nav cloud emulator smoke test → Run work
 - Artifact ZIP digest against GitHub's artifact metadata.
 - Extracted APK filename, package `com.scollorec.androidnav.emulator`, and x86_64 native ABI.
 - APK SHA-256 recorded in evidence.
-- Android API 35 x86_64 emulator boot, install and launcher activity start.
+- Android API 35 Google APIs x86_64 Pixel 2 AVD created on the hosted runner, started in TCG mode, and checked for boot completion, InputManager registration and a responsive Settings provider before input/settings commands.
+- APK installation, launcher execution, MapLibre style readiness, map viewport visual heuristic and crash/ANR checks.
+- Emulator output, readiness probes and test JUnit reports retained in the evidence bundle.
 - Screenshot, UI hierarchy, activity dump, bounded logcat and JUnit smoke report.
 
-The screenshot and UI hierarchy are evidence for a human review of map rendering; this initial smoke test does **not** claim to automatically prove that map tiles or route data rendered correctly. That visual assertion is a follow-on test.
+The emulator is started by the checked-in launcher rather than delegating boot completion to a third-party Action. This is intentional: `sys.boot_completed=1` can be observable before InputManager and Settings are registered. The launcher waits for both before issuing unlock or settings commands. Do not reintroduce the third-party runner unless its post-boot service-readiness behaviour has been verified in the exact version selected.
+
+The screenshot and UI hierarchy are evidence for a human review of map rendering; the viewport check is a heuristic and does **not** prove semantic map-tile or route correctness.
 
 ## Evidence retention
 

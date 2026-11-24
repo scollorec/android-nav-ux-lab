@@ -106,11 +106,6 @@ jobs:
             echo "artifact_expires_at=$(jq -r '.expires_at' <<<"$artifact")"
           } >> evidence/artifact-metadata.txt
 
-      # GitHub's ubuntu-24.04 runner already includes the Android SDK,
-      # platform-tools and build-tools. Avoid setup-android@v3 here: it
-      # still unconditionally requests the removed legacy SDK package "tools".
-      # reactivecircus/android-emulator-runner installs the requested image.
-
       - name: Verify APK package, ABI and checksum
         shell: bash
         run: |
@@ -142,20 +137,61 @@ jobs:
           set -euo pipefail
           bash tests/test-emulator-smoke.sh
 
-      - name: Boot Android x86_64 emulator and run smoke test
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 35
-          target: google_apis
-          arch: x86_64
-          profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-audio -no-boot-anim -camera-back none
-          emulator-boot-timeout: 900
-          disable-linux-hw-accel: true
-          disable-animations: true
-          # The runner splits script at each newline and invokes each line in a new sh process.
-          # Use one command here; the called Bash script owns the trap and test sequence.
-          script: bash .github/scripts/emulator-smoke.sh
+      - name: Run emulator bootstrap and smoke harness regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tests/test-emulator-readiness.sh
+          bash tests/test-emulator-smoke.sh
+
+      - name: Install Android API 35 x86_64 emulator image and create AVD
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager_path="$(command -v sdkmanager || true)"
+          avdmanager_path="$(command -v avdmanager || true)"
+          if [[ -z "$sdkmanager_path" ]]; then
+            sdkmanager_path="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print | sort -V | tail -1)"
+          fi
+          if [[ -z "$avdmanager_path" ]]; then
+            avdmanager_path="$(find "$ANDROID_HOME/cmdline-tools" -type f -name avdmanager -print | sort -V | tail -1)"
+          fi
+          [[ -x "$sdkmanager_path" ]] || { echo "::error::sdkmanager not found"; exit 1; }
+          [[ -x "$avdmanager_path" ]] || { echo "::error::avdmanager not found"; exit 1; }
+
+          set +o pipefail
+          yes | "$sdkmanager_path" --licenses >/dev/null
+          set -o pipefail
+          "$sdkmanager_path" --install \
+            "build-tools;37.0.0" \
+            platform-tools \
+            "platforms;android-35" \
+            emulator \
+            "system-images;android-35;google_apis;x86_64"
+
+          avd_name="android-nav-api35"
+          avd_home="$RUNNER_TEMP/android-avd"
+          mkdir -p "$avd_home"
+          export ANDROID_AVD_HOME="$avd_home"
+          set +o pipefail
+          printf 'no\n' | "$avdmanager_path" create avd --force \
+            --name "$avd_name" \
+            --package "system-images;android-35;google_apis;x86_64" \
+            --device "pixel_2"
+          set -o pipefail
+          [[ -s "$avd_home/$avd_name.avd/config.ini" ]] || {
+            echo "::error::AVD configuration was not created"
+            exit 1
+          }
+          echo "ANDROID_AVD_HOME=$avd_home" >> "$GITHUB_ENV"
+          echo "ANDROID_AVD_NAME=$avd_name" >> "$GITHUB_ENV"
+
+      - name: Launch Android x86_64 emulator and run smoke test
+        shell: bash
+        timeout-minutes: 25
+        run: |
+          set -euo pipefail
+          bash .github/scripts/launch-emulator-and-smoke.sh
 
       - name: Upload emulator evidence
         if: always()

@@ -19,7 +19,14 @@ PYCODE
 grep -q '^      - name: Checkout test harness repository$' "$WORKFLOW"
 grep -q '^        uses: actions/checkout@v4$' "$WORKFLOW"
 grep -q '^          persist-credentials: false$' "$WORKFLOW"
-grep -q '^          script: bash .github/scripts/emulator-smoke.sh$' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml"
+grep -q '^      - name: Run emulator bootstrap and smoke harness regression tests$' "$WORKFLOW"
+grep -q 'bash tests/test-emulator-readiness.sh' "$WORKFLOW"
+grep -q '^      - name: Launch Android x86_64 emulator and run smoke test$' "$WORKFLOW"
+grep -q 'bash .github/scripts/launch-emulator-and-smoke.sh' "$WORKFLOW"
+if grep -q 'reactivecircus/android-emulator-runner@v2' "$WORKFLOW"; then
+  echo "The workflow must use the readiness-aware emulator launcher." >&2
+  exit 1
+fi
 grep -q '^  workflow_dispatch:' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml"
 if grep -Eq '^  (push|pull_request|pull_request_target):' "$ROOT/.github/workflows/android-nav-emulator-smoke.yml"; then
   echo "The workflow must remain manual-only" >&2
