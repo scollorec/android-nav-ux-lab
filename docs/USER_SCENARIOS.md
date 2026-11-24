@@ -37,7 +37,7 @@ The current hosted baseline is UX Lab run [#12](https://github.com/scollorec/and
 | ID | User journey | Expected result | Execution | Status |
 |---|---|---|---|---|
 | MAP-01 | Open the map | MapLibre surface is present and the viewport contains visible detail | Cloud UI + screenshot | **PARTIAL** — run #12 verifies surface and a visual heuristic only |
-| LOC-01 | Launch with a synthetic location far from the demo camera | Camera and location marker move to the injected coordinate | Emulator GPS + visual marker assertion | **FAIL — run #13** |
+| LOC-01 | Launch with a synthetic location far from the demo camera | App callback is received; camera and location marker move to the injected coordinate | Emulator GPS + accessibility callback state + visual marker assertion | **FAIL — run #13** |
 | LOC-02 | Move the synthetic device location | Location marker follows the new coordinate and the map viewport changes | Emulator GPS + screenshot assertion | **FAIL — run #13** |
 | LOC-03 | Pan the map, then tap “Use my location and recenter map” | Marker moves off-centre after pan and returns to centre after the accessible recenter control is tapped | Cloud UI + emulator GPS + screenshot assertion | **FAIL — run #13** |
 | LOC-04 | Disable or withhold location | App presents a clear unavailable state; no stale fix is presented as current | Cloud UI + location controls | PLANNED |
