@@ -99,7 +99,20 @@ else
   record_check "map_follow_remains_enabled_after_second_synthetic_fix" false
 fi
 
-if adb_cmd shell input swipe 400 410 170 610 600 > "$EVIDENCE_DIR/diagnostics/location-map-pan.txt" 2>&1 && \
+swipe_points="$("$SCREENSHOT_PYTHON" - "$EVIDENCE_DIR/screenshots/location-second-fix.png" <<'PY'
+import sys
+from PIL import Image
+with Image.open(sys.argv[1]) as image:
+    width, height = image.size
+print(int(width * 0.83), int(height * 0.52), int(width * 0.35), int(height * 0.76))
+PY
+)" || swipe_points=""
+if [[ -n "$swipe_points" ]]; then
+  read -r start_x start_y end_x end_y <<< "$swipe_points"
+else
+  start_x=400; start_y=410; end_x=170; end_y=610
+fi
+if adb_cmd shell input swipe "$start_x" "$start_y" "$end_x" "$end_y" 600 > "$EVIDENCE_DIR/diagnostics/location-map-pan.txt" 2>&1 && \
    wait_for_marker off-centre "$EVIDENCE_DIR/screenshots/location-after-pan.png" "$EVIDENCE_DIR/diagnostics/location-after-pan-check.json"; then
   record_check "manual_map_pan_moves_location_marker_off_centre" true
 else
