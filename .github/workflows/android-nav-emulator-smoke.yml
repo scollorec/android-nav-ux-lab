@@ -131,12 +131,6 @@ jobs:
           "$RUNNER_TEMP/screenshot-venv/bin/python" -m pip install --disable-pip-version-check --no-input Pillow
           echo "SCREENSHOT_PYTHON=$RUNNER_TEMP/screenshot-venv/bin/python" >> "$GITHUB_ENV"
 
-      - name: Run emulator smoke harness regression tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash tests/test-emulator-smoke.sh
-
       - name: Run emulator bootstrap and smoke harness regression tests
         shell: bash
         run: |

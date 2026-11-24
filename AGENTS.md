@@ -133,6 +133,7 @@ Review the entire diff, not just the intended lines. Confirm:
 - No duplicated blocks, truncation, malformed quoting or accidental encoding/binary characters.
 - No unrelated files or unexpected changes.
 - Paths, line endings, indentation, YAML structure and file modes are correct.
+- For workflow changes, review the complete ordered step inventory and check that each intended build, test, bootstrap and execution stage appears exactly once; do not leave superseded or duplicate steps behind.
 - Every script/test path referenced by the workflow exists in the checked-out tree.
 - Tests invoke the exact scripts and paths that CI will invoke.
 - The regression suite actually ran and its result was observed.

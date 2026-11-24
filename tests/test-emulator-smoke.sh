@@ -21,6 +21,15 @@ grep -q '^        uses: actions/checkout@v4$' "$WORKFLOW"
 grep -q '^          persist-credentials: false$' "$WORKFLOW"
 grep -q '^      - name: Run emulator bootstrap and smoke harness regression tests$' "$WORKFLOW"
 grep -q 'bash tests/test-emulator-readiness.sh' "$WORKFLOW"
+[[ "$(grep -c '^      - name: Run emulator bootstrap and smoke harness regression tests$' "$WORKFLOW")" -eq 1 ]]
+if grep -q '^      - name: Run emulator smoke harness regression tests$' "$WORKFLOW"; then
+  echo "Duplicate standalone harness regression step detected." >&2
+  exit 1
+fi
+bootstrap_line="$(grep -n '^      - name: Run emulator bootstrap and smoke harness regression tests$' "$WORKFLOW" | cut -d: -f1)"
+install_line="$(grep -n '^      - name: Install Android API 35 x86_64 emulator image and create AVD$' "$WORKFLOW" | cut -d: -f1)"
+launch_line="$(grep -n '^      - name: Launch Android x86_64 emulator and run smoke test$' "$WORKFLOW" | cut -d: -f1)"
+(( bootstrap_line < install_line && install_line < launch_line ))
 grep -q '^      - name: Launch Android x86_64 emulator and run smoke test$' "$WORKFLOW"
 grep -q 'bash .github/scripts/launch-emulator-and-smoke.sh' "$WORKFLOW"
 if grep -q 'reactivecircus/android-emulator-runner@v2' "$WORKFLOW"; then
