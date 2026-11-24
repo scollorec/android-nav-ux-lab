@@ -34,7 +34,7 @@ See APP-01 to APP-04 and PERM-01 to PERM-03 in the scenario catalogue.
 - [ ] Disabled, unavailable, stale and low-accuracy location states are communicated correctly.
 - [ ] Location updates recover after interruption without duplicate listeners or a crash.
 
-The existing run #12 evidence covers only MapLibre surface presence and a viewport-detail heuristic. Run #13 failed the app-visible marker/follow/recenter assertions. Its screenshot checker also had a colour mismatch: it searched for red although the app specifies blue/green. The run #13 screenshots contain no app-specified blue/green marker in the map area, so the failure remains valid. The checker is corrected in the current lab branch; rerun is required to validate the correction. See the [run #13 artifact](https://github.com/scollorec/android-nav-ux-lab/actions/runs/45386108369/artifacts/14917260922) and [scenario-level results](USER_SCENARIOS.md). Provider-level GPS state must not be mistaken for proof of app callback delivery or rendering.
+The existing run #12 evidence covers only MapLibre surface presence and a viewport-detail heuristic. Run #13 exercised the new GPS scenarios but failed the app-visible marker/follow/recenter assertions. See the [run #13 artifact](https://github.com/scollorec/android-nav-ux-lab/actions/runs/45386108369/artifacts/14917260922) and [scenario-level results](USER_SCENARIOS.md) for evidence. Provider-level GPS state must not be mistaken for proof of app callback delivery or rendering.
 
 See MAP-01 and LOC-01 to LOC-06 in the scenario catalogue.
 
