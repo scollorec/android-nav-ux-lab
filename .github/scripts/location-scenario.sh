@@ -51,7 +51,7 @@ finish_location_test() {
     echo "::error::Synthetic location scenarios failed (script_exit=$rc, assertion_failures=$failures)."
     exit 1
   fi
-  echo "Synthetic location scenarios passed: permissions, initial GPS, second fix, map pan and recenter."
+  echo "Synthetic location scenarios passed: permissions, app callback, initial GPS, second fix, map pan and recenter."
 }
 trap finish_location_test EXIT
 trap 'exit 130' INT
@@ -85,6 +85,16 @@ if wait_for_marker centered "$EVIDENCE_DIR/screenshots/location-initial.png" "$E
   record_check "initial_synthetic_location_marker_is_centered" true
 else
   record_check "initial_synthetic_location_marker_is_centered" false
+fi
+
+# Independently prove the app's fused-location callback received a fix.
+# The content description is intentionally non-sensitive: no coordinates are logged.
+if adb_cmd shell uiautomator dump /sdcard/location-status.xml > "$EVIDENCE_DIR/diagnostics/location-status-dump.txt" 2>&1 && \
+   adb_cmd pull /sdcard/location-status.xml "$EVIDENCE_DIR/diagnostics/location-status-window.xml" >> "$EVIDENCE_DIR/diagnostics/location-status-dump.txt" 2>&1 && \
+   grep -Fq 'Location fix received' "$EVIDENCE_DIR/diagnostics/location-status-window.xml"; then
+  record_check "app_location_callback_received" true
+else
+  record_check "app_location_callback_received" false
 fi
 
 # Verify the second location changes the underlying map viewport while the
