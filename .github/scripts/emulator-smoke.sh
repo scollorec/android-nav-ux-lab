@@ -124,6 +124,24 @@ printf '%s\n' "$installed_path" > "$EVIDENCE_DIR/diagnostics/package-path.txt"
   exit 1
 }
 
+# Grant only the foreground permissions required for this synthetic-location
+# test run, and inject a test coordinate before the activity starts.
+if [[ "${ENABLE_LOCATION_SCENARIOS:-0}" == "1" ]]; then
+  INITIAL_FIX_LONGITUDE="${INITIAL_FIX_LONGITUDE:-2.2945}"
+  INITIAL_FIX_LATITUDE="${INITIAL_FIX_LATITUDE:-48.8584}"
+  adb_cmd shell pm grant "$EXPECTED_PACKAGE" android.permission.ACCESS_COARSE_LOCATION \
+    > "$EVIDENCE_DIR/diagnostics/location-permission-grant.txt" 2>&1
+  adb_cmd shell pm grant "$EXPECTED_PACKAGE" android.permission.ACCESS_FINE_LOCATION \
+    >> "$EVIDENCE_DIR/diagnostics/location-permission-grant.txt" 2>&1
+  adb_cmd emu geo fix "$INITIAL_FIX_LONGITUDE" "$INITIAL_FIX_LATITUDE" 35 8 0 \
+    > "$EVIDENCE_DIR/diagnostics/location-initial-fix.txt" 2>&1
+  {
+    echo "initial_longitude=$INITIAL_FIX_LONGITUDE"
+    echo "initial_latitude=$INITIAL_FIX_LATITUDE"
+    echo "location_permissions=coarse,fine"
+  } > "$EVIDENCE_DIR/diagnostics/location-test-fixture.txt"
+fi
+
 adb_cmd shell monkey -p "$EXPECTED_PACKAGE" -c android.intent.category.LAUNCHER 1 \
   > "$EVIDENCE_DIR/diagnostics/launch-command.txt" 2>&1
 

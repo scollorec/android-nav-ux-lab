@@ -38,8 +38,10 @@ The tested app artifact came from the trusted Android-nav
 The detailed [user-scenario catalogue](docs/USER_SCENARIOS.md) defines the full
 coverage target and distinguishes verified, planned, dependency-gated, device-only
 and not-yet-implemented capabilities. The [test plan](docs/TEST_PLAN.md) tracks
-the staged implementation. The first functional expansion is synthetic GPS,
-location-marker validation and map re-centering.
+the staged implementation. The first functional expansion injects synthetic GPS,
+checks the custom location marker, verifies follow after a second fix, pans the
+map and checks re-centering. The harness code is being validated; these scenarios
+remain unverified until a hosted run succeeds.
 
 ## Operating model
 

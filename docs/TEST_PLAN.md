@@ -28,9 +28,9 @@ See APP-01 to APP-04 and PERM-01 to PERM-03 in the scenario catalogue.
 ## Stage 2 — map and location
 
 - [x] MapLibre MapView appears in the UI hierarchy and the captured viewport contains visible map detail; the viewport check is a visual heuristic only.
-- [ ] Initial camera and user-location marker follow an injected synthetic coordinate that differs materially from the demo camera.
-- [ ] A second synthetic GPS fix moves the location marker correctly.
-- [ ] Manual map movement disables follow; the recenter control restores the camera to the injected fix.
+- [ ] Initial camera and user-location marker follow an injected synthetic coordinate that differs materially from the demo camera. (Harness implementation added; hosted result pending.)
+- [ ] A second synthetic GPS fix moves the location marker correctly. (Harness implementation added; hosted result pending.)
+- [ ] Manual map movement disables follow; the recenter control restores the camera to the injected fix. (Harness implementation added; hosted result pending.)
 - [ ] Disabled, unavailable, stale and low-accuracy location states are communicated correctly.
 - [ ] Location updates recover after interruption without duplicate listeners or a crash.
 
