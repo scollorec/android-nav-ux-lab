@@ -6,8 +6,8 @@ A public, GitHub-hosted Android emulator test harness for the private
 ## Purpose
 
 - Install a precisely identified Android-nav emulator APK on a temporary cloud emulator.
-- Run automated launch, navigation and UI checks.
-- Capture screenshots, logcat and machine-readable test reports.
+- Exercise repeatable user journeys, including lifecycle, permissions, map/location, search, routing and active navigation.
+- Capture screenshots, UI hierarchy, logcat and machine-readable scenario reports.
 - Tie every result to the exact Android-nav source commit and APK checksum.
 - Destroy the emulator when the GitHub Actions job ends.
 
@@ -19,19 +19,27 @@ Before changing this repository, read the mandatory [engineering instructions](A
 
 ## Current status
 
-**Bootstrap / integration.** The Android-nav repository already builds and
-uploads a dedicated x86_64 emulator APK from trusted feature-branch pushes.
+**Stage 0 — emulator and artifact plumbing: complete.** Hosted UX Lab
+[run #12](https://github.com/scollorec/android-nav-ux-lab/actions/runs/45369689487)
+completed successfully. It verified the trusted APK artifact, KVM acceleration,
+Android framework readiness, APK installation, launcher completion, app foreground,
+MapLibre accessibility-node presence, a viewport-detail heuristic and no detected
+crash/ANR. It did not test GPS, search, routes or navigation.
 
-Verified workflow evidence:
-- Workflow: [Option B Android POC](https://github.com/scollorec/Android-nav/actions/workflows/option-b-poc.yml)
-- Successful run: [#173 — build one source commit on phone and emulator](https://github.com/scollorec/Android-nav/actions/runs/44998552450)
+The tested app artifact came from the trusted Android-nav
+[run #173](https://github.com/scollorec/Android-nav/actions/runs/44998552450):
+- Source branch: `feature/t1-tesla-experience`
+- Source commit: `31dbb27aa81cc37b889a01610aab3db23aecc560`
 - Artifact: `android-nav-emulator-x86_64-release-apk`
 - APK filename: `Android-Nav-emulator-x86_64.apk`
 - Package: `com.scollorec.androidnav.emulator`
-- ABI verification: `x86_64`
-- Artifact retention: 7 days
+- ABI: `x86_64`
 
-No Android-nav Gradle or APK build changes are required for the initial lab integration.
+The detailed [user-scenario catalogue](docs/USER_SCENARIOS.md) defines the full
+coverage target and distinguishes verified, planned, dependency-gated, device-only
+and not-yet-implemented capabilities. The [test plan](docs/TEST_PLAN.md) tracks
+the staged implementation. The first functional expansion is synthetic GPS,
+location-marker validation and map re-centering.
 
 ## Operating model
 
@@ -41,8 +49,8 @@ No Android-nav Gradle or APK build changes are required for the initial lab inte
    stored as an Actions secret.
 3. The workflow verifies artifact identity, APK checksum, package and ABI.
 4. It boots a temporary Android x86_64 emulator, installs and launches the app,
-   and runs UI tests.
-5. Screenshots, logcat and test reports are uploaded as short-retention lab artifacts.
+   and runs the automated user-scenario suite.
+5. Screenshots, UI hierarchy, logcat and test reports are uploaded as short-retention lab artifacts.
 
 The lab must not clone or build private Android-nav source code. The cross-repository
 token must never be exposed to untrusted pull-request code or printed in logs.
