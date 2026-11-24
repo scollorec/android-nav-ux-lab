@@ -1,6 +1,6 @@
 # Android-Nav UX Lab handover
 
-**Updated:** 2026-11-24 14:17 UTC  
+**Updated:** 2026-11-24 15:15 UTC  
 **Repository:** `scollorec/android-nav-ux-lab`  
 **Default branch:** `main`  
 
@@ -44,6 +44,7 @@ Keep UX Lab changes separate from Android-nav application fixes. Use synthetic G
 
 - PR #1 merged the 39-scenario catalogue and initial synthetic GPS/recenter harness: [PR #1](https://github.com/scollorec/android-nav-ux-lab/pull/1).
 - PR #2 merged the run #13 failure record, corrected scenario statuses and an engineering rule distinguishing GMS/provider state from proof that the app consumed a location fix: [PR #2](https://github.com/scollorec/android-nav-ux-lab/pull/2).
+- The run #13 screenshot checker originally searched for red, but the app specification uses a blue marker for a fresh fix and green for a stale/unusable fix. Re-inspection found neither app-specified marker in the map area. Branch `fix/location-marker-colour-check` updates the checker to detect the blue/green circular marker, replaces the red-arrow test fixtures with blue circles, and clarifies the historical evidence. It does not reclassify run #13 or claim the scenarios pass.
 - PR #2 merge commit: `d2e686ff8e1f6853bb67136e445f71259a929774`.
 
 ## Application-repository gate
@@ -69,4 +70,5 @@ The 39 catalogue rows currently classify as: **0 VERIFIED, 2 PARTIAL, 3 FAIL, 1 
 - Do not change Android-nav app source from this repository.
 - Do not mark a scenario PASS without hosted evidence for its stated assertion.
 - For each user interaction on the app/lab project, update this handover with the actual work, exact commits/runs, evidence, blockers and next action.
+- Marker-checker correction PR: pending creation from `fix/location-marker-colour-check`; changes are local to the public lab and require a new hosted run before any scenario status changes.
 - Handover PR [#3](https://github.com/scollorec/android-nav-ux-lab/pull/3) was merged to `main` as commit `69f241c033da26e08dbba82c4baab51a7b0af059`; the merged file was fetched back and verified.
