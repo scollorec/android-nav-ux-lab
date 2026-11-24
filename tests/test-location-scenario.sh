@@ -42,7 +42,7 @@ for name, center, background in fixtures:
     image = Image.new("RGB", (480, 800), background)
     if center:
         x, y = center
-        ImageDraw.Draw(image).polygon([(x, y-20), (x+11, y+13), (x, y+6), (x-11, y+13)], fill=(239, 72, 52))
+        ImageDraw.Draw(image).ellipse((x-8, y-8, x+8, y+8), fill=(0, 132, 255))
     image.save(root / name)
 PY
 
@@ -113,7 +113,7 @@ fixtures = (
 for name, centre, background in fixtures:
     image = Image.new("RGB", (480, 800), background)
     x, y = centre
-    ImageDraw.Draw(image).polygon([(x, y-20), (x+11, y+13), (x, y+6), (x-11, y+13)], fill=(239, 72, 52))
+    ImageDraw.Draw(image).ellipse((x-8, y-8, x+8, y+8), fill=(0, 132, 255))
     image.save(root / name)
 PY
 
