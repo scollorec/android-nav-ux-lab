@@ -70,5 +70,5 @@ The 39 catalogue rows currently classify as: **0 VERIFIED, 2 PARTIAL, 3 FAIL, 1 
 - Do not change Android-nav app source from this repository.
 - Do not mark a scenario PASS without hosted evidence for its stated assertion.
 - For each user interaction on the app/lab project, update this handover with the actual work, exact commits/runs, evidence, blockers and next action.
-- Marker-checker correction PR: pending creation from `fix/location-marker-colour-check`; changes are local to the public lab and require a new hosted run before any scenario status changes.
+- Marker-checker correction PR: [PR #5](https://github.com/scollorec/android-nav-ux-lab/pull/5) from `fix/location-marker-colour-check`; changes are confined to the public lab and require a new hosted run before any scenario status changes.
 - Handover PR [#3](https://github.com/scollorec/android-nav-ux-lab/pull/3) was merged to `main` as commit `69f241c033da26e08dbba82c4baab51a7b0af059`; the merged file was fetched back and verified.
