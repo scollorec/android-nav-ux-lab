@@ -21,6 +21,7 @@ if [[ -f "$LAUNCHER" && -f "$SMOKE" && -f "$WORKFLOW" ]]; then
   grep -q 'emu geo fix "$INITIAL_FIX_LONGITUDE" "$INITIAL_FIX_LATITUDE"' "$SMOKE"
   grep -q 'bash tests/test-location-scenario.sh' "$WORKFLOW"
   grep -q '^  workflow_dispatch:' "$WORKFLOW"
+  grep -q 'feature/uxlab-gps-location-follow' "$WORKFLOW"
   if grep -Eq '^  (push|pull_request|pull_request_target):' "$WORKFLOW"; then
     echo "The workflow must remain manual-only" >&2
     exit 1
