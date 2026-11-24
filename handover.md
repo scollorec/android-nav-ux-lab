@@ -44,7 +44,7 @@ Keep UX Lab changes separate from Android-nav application fixes. Use synthetic G
 
 - PR #1 merged the 39-scenario catalogue and initial synthetic GPS/recenter harness: [PR #1](https://github.com/scollorec/android-nav-ux-lab/pull/1).
 - PR #2 merged the run #13 failure record, corrected scenario statuses and an engineering rule distinguishing GMS/provider state from proof that the app consumed a location fix: [PR #2](https://github.com/scollorec/android-nav-ux-lab/pull/2).
-- The run #13 screenshot checker originally searched for red, but the app specification uses a blue marker for a fresh fix and green for a stale/unusable fix. Re-inspection found neither app-specified marker in the map area. Branch `fix/location-marker-colour-check` updates the checker to detect the blue/green circular marker, replaces the red-arrow test fixtures with blue circles, and clarifies the historical evidence. It does not reclassify run #13 or claim the scenarios pass.
+- The run #13 screenshot checker originally searched for red, but the app specification uses a blue marker for a fresh fix and green for a stale/unusable fix. Re-inspection found neither app-specified marker in the map area. Branch `fix/location-marker-colour-check` updates the checker to detect the blue/green circular marker, replaces the red-arrow test fixtures with blue circles, and clarifies the historical evidence. It does not reclassify run #13 or claim the scenarios pass. The manual-only emulator workflow now allowlists `feature/uxlab-gps-location-follow` alongside the existing `feature/t1-tesla-experience` source branch; exact run/SHA/artifact digest/package/ABI/checksum checks remain intact.
 - PR #2 merge commit: `d2e686ff8e1f6853bb67136e445f71259a929774`.
 
 ## Application-repository gate
