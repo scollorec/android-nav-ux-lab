@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Detect the red Android-nav location-arrow marker in an emulator screenshot.
+"""Detect the blue/green Android-nav current-location dot in an emulator screenshot.
 
-This is a visual regression heuristic, not semantic map recognition. It is
-separate from the MapLibre surface-presence and map-viewport detail checks.
+This is a visual regression heuristic, not semantic map recognition. The app
+specifies an electric-blue marker for a fresh fix and green for a stale or
+unusable last-known fix; the marker is a small circle with a white outline.
 """
 from __future__ import annotations
 
@@ -15,19 +16,22 @@ from pathlib import Path
 from PIL import Image
 
 
-def find_red_components(image: Image.Image) -> list[dict[str, float | int]]:
+def find_location_components(image: Image.Image) -> list[dict[str, float | int | str]]:
     rgb = image.convert("RGB")
     width, height = rgb.size
     raw_pixels = rgb.tobytes()
     mask = bytearray(width * height)
+
     for index in range(width * height):
         offset = index * 3
         red, green, blue = raw_pixels[offset : offset + 3]
-        if red >= 155 and green <= 125 and blue <= 115 and red - green >= 65 and red - blue >= 55:
-            mask[index] = 1
+        if blue >= 190 and 75 <= green <= 185 and red <= 70 and blue - red >= 140:
+            mask[index] = 1  # fresh electric-blue location marker
+        elif 20 <= red <= 100 and green >= 155 and 35 <= blue <= 135 and green - red >= 90:
+            mask[index] = 2  # stale / unusable green location marker
 
     visited = bytearray(width * height)
-    components: list[dict[str, float | int]] = []
+    components: list[dict[str, float | int | str]] = []
     for start, selected in enumerate(mask):
         if not selected or visited[start]:
             continue
@@ -56,12 +60,26 @@ def find_red_components(image: Image.Image) -> list[dict[str, float | int]]:
                     if nx < 0 or nx >= width:
                         continue
                     neighbour = row_offset + nx
-                    if mask[neighbour] and not visited[neighbour]:
+                    if mask[neighbour] == selected and not visited[neighbour]:
                         visited[neighbour] = 1
                         queue.append(neighbour)
+
         box_width, box_height = max_x - min_x + 1, max_y - min_y + 1
-        if 70 <= count <= 6000 and 6 <= box_width <= 110 and 8 <= box_height <= 150:
-            components.append({"pixels": count, "x": round(sum_x / count, 2), "y": round(sum_y / count, 2), "width": box_width, "height": box_height})
+        aspect = box_width / max(box_height, 1)
+        centre_y = sum_y / count
+        # The map's location dot is compact and circular. Exclude the bottom
+        # app-build banner, whose green text must never be mistaken for a fix.
+        inside_map_area = height * 0.08 <= centre_y <= height * 0.92
+        circular_shape = 0.65 <= aspect <= 1.5
+        if 20 <= count <= 800 and 6 <= box_width <= 30 and 6 <= box_height <= 30 and circular_shape and inside_map_area:
+            components.append({
+                "pixels": count,
+                "x": round(sum_x / count, 2),
+                "y": round(centre_y, 2),
+                "width": box_width,
+                "height": box_height,
+                "color": "blue" if selected == 1 else "green",
+            })
     return sorted(components, key=lambda item: int(item["pixels"]), reverse=True)
 
 
@@ -80,9 +98,9 @@ def main() -> int:
         return 2
 
     width, height = image.size
-    components = find_red_components(image)
+    components = find_location_components(image)
     if not components:
-        print(json.dumps({"ok": False, "error": "No qualifying red location-marker component found", "width": width, "height": height}))
+        print(json.dumps({"ok": False, "error": "No qualifying blue or green location-marker component found", "width": width, "height": height}))
         return 1
 
     marker = components[0]
